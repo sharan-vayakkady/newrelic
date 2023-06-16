@@ -21,5 +21,4 @@ resource "newrelic_synthetics_monitor" "sharan_com_monitor" {
   locations         = ["AWS_US_WEST_1"]
   status            = "ENABLED"
   sla_threshold     = 7.0
-  sla_failures_only = true
 }
