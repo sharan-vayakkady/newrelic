@@ -12,9 +12,14 @@ terraform {
   }
 }
 
+# Declare input variables
+variable "newrelic_api_key" {
+  description = "API key for New Relic"
+}
+
 # Configure the New Relic provider
 provider "newrelic" {
-  api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
+  api_key    = var.newrelic_api_key
   account_id = "3954397"
 }
 
