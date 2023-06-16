@@ -29,4 +29,4 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -var="newrelic_api_key=NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" -auto-approve
