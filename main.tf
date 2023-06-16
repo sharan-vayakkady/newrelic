@@ -19,10 +19,10 @@ provider "newrelic" {
 
 # Create a synthetic monitor
 resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
-  name              = "flipkart.com ping"
+  name              = "flipkart1.com ping"
   type              = "SIMPLE"
   frequency         = 15
-  uri               = "https://www.flipkart.com"
+  uri               = "https://www.flipkart1.com"
   locations         = ["AWS_US_WEST_1"]
   status            = "ENABLED"
   sla_threshold     = 7.0
