@@ -30,22 +30,24 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
 }
 
 # Configure email notification channel using New Relic REST API
-resource "null_resource" "create_notification_channel" {
-  depends_on = [newrelic_synthetics_monitor.flipkart_com_monitor]
+data "external" "create_notification_channel" {
+  program = ["bash", "-c", <<EOT
+    curl -X POST \
+      -H "Api-Key: ${var.newrelic_api_key}" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "Email Notification Channel",
+        "type": "email",
+        "configuration": {
+          "recipients": "sharan.vayakkady@gmail.com"
+        }
+      }' \
+      "https://synthetics.newrelic.com/synthetics/api/v4/monitors/${newrelic_synthetics_monitor.flipkart_com_monitor.id}/notification-channels"
+  EOT
+  ]
+}
 
-  provisioner "local-exec" {
-    command = <<EOT
-      curl -X POST \
-        -H "Api-Key: ${newrelic_synthetics_monitor.flipkart_com_monitor.api_key}" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "name": "Email Notification Channel",
-          "type": "email",
-          "configuration": {
-            "recipients": "sharan.vayakkady@gmail.com"
-          }
-        }' \
-        "https://synthetics.newrelic.com/synthetics/api/v4/monitors/${newrelic_synthetics_monitor.flipkart_com_monitor.id}/notification-channels"
-    EOT
-  }
+# Apply the configuration
+output "notification_channel_response" {
+  value = data.external.create_notification_channel.result
 }
