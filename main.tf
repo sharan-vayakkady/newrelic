@@ -56,10 +56,6 @@ resource "newrelic_synthetics_alert_condition" "monitor_failure_condition" {
     priority          = "critical"
     operator          = "above"
     threshold         = 0
-    time_function     = "all"
     waiting_duration  = 0
-    time_function     = "all"
-    threshold_duration = 0
-    time_function     = "all"
   }
 }
