@@ -27,17 +27,25 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
   locations     = ["AWS_US_WEST_1"]
   status        = "ENABLED"
   sla_threshold = 7.0
-
-  notification_channels = [
-  newrelic_synthetics_notification_channel.email_channel.id
-   ]
 }
 
+# Configure email notification channel using New Relic REST API
+resource "null_resource" "create_notification_channel" {
+  depends_on = [newrelic_synthetics_monitor.flipkart_com_monitor]
 
-resource "newrelic_synthetics_notification_channel" "email_channel" {
-  name     = "Email Notification Channel"
-  type     = "Email"
-  settings = {
-    email = "sharan.vayakkady@gmail.com"
+  provisioner "local-exec" {
+    command = <<EOT
+      curl -X POST \
+        -H "Api-Key: ${newrelic_synthetics_monitor.flipkart_com_monitor.api_key}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "name": "Email Notification Channel",
+          "type": "email",
+          "configuration": {
+            "recipients": "sharan.vayakkady@gmail.com"
+          }
+        }' \
+        "https://synthetics.newrelic.com/synthetics/api/v4/monitors/${newrelic_synthetics_monitor.flipkart_com_monitor.id}/notification-channels"
+    EOT
   }
 }
