@@ -1,4 +1,17 @@
-# Provider configuration
+terraform {
+  required_providers {
+    newrelic = {
+      source  = "newrelic/newrelic"
+      version = "2.15.0"
+    }
+  }
+  backend "s3" {
+    bucket = "ssv-github"
+    key    = "newrelic/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 
 provider "newrelic" {
   api_key = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
