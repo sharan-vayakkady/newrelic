@@ -22,30 +22,32 @@ variable "newrelic_api_key" {
 }
 
 provider "newrelic" {
-  api_key = var.newrelic_api_key
+  api_key    = var.newrelic_api_key
   account_id = 3954397
 }
 
 resource "newrelic_synthetics_monitor" "flipkart_monitor" {
-  name         = "Flipkart Monitor"
-  type         = "SCRIPT_BROWSER"
-  frequency    = 15
-  locations    = ["AWS_US_WEST_1"]
+  name      = "Flipkart Monitor"
+  type      = "SCRIPT_BROWSER"
+  frequency = 15
+  locations = ["AWS_US_WEST_1"]
 
-  options {
-    validationString = "Shopping Cart"
-  }
+  status        = "ENABLED"
+  sla_threshold = 7
 
   script {
-    type    = "SCRIPT"
-    text    = <<EOF
-    var assert = require('assert');
-    $browser.get('https://www.flipkart.com/');
-    $browser.wait($browser.waitForElement($driver.By.css('.cart-icon')))
-      .then(function(element) {
-        assert(element, 'Shopping Cart is not found');
-      });
-    EOF
+    script_type = "BROWSER"
+    script_text = <<EOF
+var assert = require('assert');
+$browser.get('https://www.flipkart.com/');
+$browser.waitForElement($driver.By.css('.cart-icon')).then(function(element) {
+  assert(element, 'Shopping Cart is not found');
+});
+EOF
+  }
+
+  options {
+    validation_string = "Shopping Cart"
   }
 }
 
@@ -58,22 +60,24 @@ resource "newrelic_alert_channel" "email_alert" {
 }
 
 resource "newrelic_alert_policy" "flipkart_monitor_policy" {
-  name       = "Flipkart Monitor Policy"
+  name                = "Flipkart Monitor Policy"
   incident_preference = "PER_POLICY"
 }
 
 resource "newrelic_alert_condition" "flipkart_monitor_condition" {
   name                 = "Flipkart Monitor Condition"
   policy_id            = newrelic_alert_policy.flipkart_monitor_policy.id
-  type                 = "synthetic_monitor"
+  type                 = "monitor"
   enabled              = true
-  violation_close_timer = 10
+  violation_time_limit = 10
 
-  entities {
-    name            = newrelic_synthetics_monitor.flipkart_monitor.name
-    type            = "synthetic_monitor"
-    condition_scope = "apps"
-  }
+  entities = [
+    {
+      name            = newrelic_synthetics_monitor.flipkart_monitor.name
+      type            = "monitor"
+      condition_scope = "apps"
+    }
+  ]
 
   terms {
     duration      = 5
