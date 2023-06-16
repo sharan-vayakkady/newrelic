@@ -39,9 +39,7 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
 }
 
 # Configure email notification channel using New Relic REST API
-provider "http" {
-  follow_redirects = true
-}
+provider "http" {}
 
 data "http" "create_notification_channel" {
   url = "https://synthetics.newrelic.com/synthetics/api/v3/monitors/${newrelic_synthetics_monitor.flipkart_com_monitor.id}/notification-channels"
