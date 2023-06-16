@@ -25,10 +25,6 @@ provider "newrelic" {
   api_key = var.newrelic_api_key
 }
 
-variable "newrelic_api_key" {
-  description = "API key for New Relic"
-}
-
 resource "newrelic_synthetics_monitor" "example_monitor" {
   name        = "Example Monitor"
   frequency   = 15
