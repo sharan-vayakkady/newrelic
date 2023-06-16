@@ -41,17 +41,21 @@ resource "newrelic_alert_channel" "slack_channel" {
 # Create an alert policy for the monitor
 resource "newrelic_alert_policy" "monitor_failure_policy" {
   name  = "Monitor Failure"
-}
-
-# Create an alert policy channel for the Slack channel
-resource "newrelic_alert_policy_channel" "slack_channel" {
-  policy_id    = newrelic_alert_policy.monitor_failure_policy.id
-  channel_ids  = [newrelic_alert_channel.slack_channel.id]
-  incident_preference = "PER_POLICY"
-}
-
-# Associate the alert policy with the monitor
-resource "newrelic_synthetics_monitor_alert_condition" "flipkart_com_monitor_policy" {
-  monitor_id   = newrelic_synthetics_monitor.flipkart_com_monitor.id
-  policy_id    = newrelic_alert_policy.monitor_failure_policy.id
+  event = true
+  conditions {
+    name          = "Monitor Failure"
+    enabled       = true
+    terms {
+      duration     = 1
+      priority     = "critical"
+      operator     = "above"
+      threshold    = 0
+      time_function = "all"
+    }
+    violation_time_limit = 5
+    evaluation_offset   = 0
+  }
+  channels {
+    channel_id = newrelic_alert_channel.slack_channel.id
+  }
 }
