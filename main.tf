@@ -16,26 +16,13 @@ variable "newrelic_api_key" {
 }
 
 resource "newrelic_synthetics_monitor" "flipkart_monitor" {
-  name          = "Flipkart Monitor"
-  type          = "SCRIPT_BROWSER"
+  name          = "flipkart1.com ping"
+  type          = "SIMPLE"
   frequency     = 15
+  uri           = "https://www.flipkart1.com"
   locations     = ["AWS_US_WEST_1"]
-  sla_threshold = 7
-
-  script {
-    script_type = "BROWSER"
-    script_text = <<EOF
-var assert = require('assert');
-$browser.get('https://www.flipkart.com/');
-$browser.waitForElement($driver.By.css('.cart-icon')).then(function(element) {
-  assert(element, 'Shopping Cart is not found');
-});
-EOF
-  }
-
-  options {
-    validation_string = "Shopping Cart"
-  }
+  status        = "ENABLED"
+  sla_threshold = 7.0
 }
 
 resource "newrelic_alert_channel" "email_alert" {
