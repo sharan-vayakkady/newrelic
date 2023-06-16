@@ -34,7 +34,7 @@ resource "newrelic_alert_channel" "slack_channel" {
   name = "slack-channel"
   type = "slack"
   config {
-    api_url = "https://hooks.slack.com/services/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"
+    api_key = "https://hooks.slack.com/services/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"
   }
 }
 
@@ -50,17 +50,19 @@ resource "newrelic_alert_condition" "monitor_failure_condition" {
   name      = "Monitor Failure"
   enabled   = true
   type      = "static"
-  entities {
-    name = newrelic_synthetics_monitor.flipkart_com_monitor.name
-    type = "Monitor"
-  }
+
+  entities = [
+    {
+      name = newrelic_synthetics_monitor.flipkart_com_monitor.name
+      type = "Monitor"
+    }
+  ]
 
   term {
-    duration         = 1
-    priority         = "critical"
-    operator         = "above"
-    threshold        = 0
-    time_function    = "all"
-    waiting_duration = 0
+    duration      = "5"
+    operator      = "above"
+    priority      = "critical"
+    threshold     = "0"
+    time_function = "all"
   }
 }
