@@ -26,10 +26,6 @@ provider "newrelic" {
   account_id = 3954397
 }
 
-provider "newrelic" {
-  api_key = "<your_newrelic_api_key>"
-}
-
 resource "newrelic_synthetics_monitor" "flipkart_monitor" {
   name         = "Flipkart Monitor"
   type         = "SCRIPT_BROWSER"
