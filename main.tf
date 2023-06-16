@@ -4,21 +4,7 @@ terraform {
       source  = "newrelic/newrelic"
       version = "2.15.0"
     }
-    http = {
-      source = "hashicorp/http"
-      version = "2.1.0"
-    }
   }
-  backend "s3" {
-    bucket = "ssv-github"
-    key    = "newrelic/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-# Declare input variables
-variable "newrelic_api_key" {
-  description = "API key for New Relic"
 }
 
 provider "newrelic" {
@@ -27,12 +13,10 @@ provider "newrelic" {
 }
 
 resource "newrelic_synthetics_monitor" "flipkart_monitor" {
-  name      = "Flipkart Monitor"
-  type      = "SCRIPT_BROWSER"
-  frequency = 15
-  locations = ["AWS_US_WEST_1"]
-
-  status        = "ENABLED"
+  name          = "Flipkart Monitor"
+  type          = "SCRIPT_BROWSER"
+  frequency     = 15
+  locations     = ["AWS_US_WEST_1"]
   sla_threshold = 7
 
   script {
@@ -54,7 +38,8 @@ EOF
 resource "newrelic_alert_channel" "email_alert" {
   name   = "Email Alert"
   type   = "email"
-  config = {
+
+  config {
     recipients = "sharan.vayakkady@gmail.com"
   }
 }
