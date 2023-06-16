@@ -26,28 +26,69 @@ provider "newrelic" {
   account_id = 3954397
 }
 
-resource "newrelic_synthetics_monitor" "example_monitor" {
-  name        = "Example Monitor"
-  frequency   = 15
-  uri         = "https://www.example.com"
-  locations   = ["AWS_US_WEST_2"]
-  status      = "ENABLED"
-  sla         = 5
-  type        = "SIMPLE"
-  security_policies = ["TRUSTED_CERTIFICATE"]
+provider "newrelic" {
+  api_key = "<your_newrelic_api_key>"
 }
 
-resource "newrelic_synthetics_notification_channel" "example_channel" {
-  name      = "Example Channel"
-  type      = "Email"
-  config    = {
+resource "newrelic_synthetics_monitor" "flipkart_monitor" {
+  name         = "Flipkart Monitor"
+  type         = "SCRIPT_BROWSER"
+  frequency    = 15
+  locations    = ["AWS_US_WEST_1"]
+
+  options {
+    validationString = "Shopping Cart"
+  }
+
+  script {
+    type    = "SCRIPT"
+    text    = <<EOF
+    var assert = require('assert');
+    $browser.get('https://www.flipkart.com/');
+    $browser.wait($browser.waitForElement($driver.By.css('.cart-icon')))
+      .then(function(element) {
+        assert(element, 'Shopping Cart is not found');
+      });
+    EOF
+  }
+}
+
+resource "newrelic_alert_channel" "email_alert" {
+  name   = "Email Alert"
+  type   = "email"
+  config = {
     recipients = "sharan.vayakkady@gmail.com"
   }
 }
 
-resource "newrelic_synthetics_monitor_channel" "example_monitor_channel" {
-  monitor_id            = newrelic_synthetics_monitor.example_monitor.id
-  channel_ids           = [newrelic_synthetics_notification_channel.example_channel.id]
-  types                 = ["ALERT"]
-  escalation_policy_ids = []
+resource "newrelic_alert_policy" "flipkart_monitor_policy" {
+  name       = "Flipkart Monitor Policy"
+  incident_preference = "PER_POLICY"
+}
+
+resource "newrelic_alert_condition" "flipkart_monitor_condition" {
+  name                 = "Flipkart Monitor Condition"
+  policy_id            = newrelic_alert_policy.flipkart_monitor_policy.id
+  type                 = "synthetic_monitor"
+  enabled              = true
+  runbook_url          = "https://runbook.example.com"
+  violation_close_timer = 10
+
+  entities {
+    name            = newrelic_synthetics_monitor.flipkart_monitor.name
+    type            = "synthetic_monitor"
+    condition_scope = "apps"
+  }
+
+  terms {
+    duration      = 5
+    operator      = "above"
+    priority      = "critical"
+    threshold     = 0
+    time_function = "all"
+
+    notifications {
+      channel_id = newrelic_alert_channel.email_alert.id
+    }
+  }
 }
