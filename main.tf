@@ -5,6 +5,11 @@ terraform {
       version = "2.15.0"
     }
   }
+  backend "s3" {
+    bucket = "ssv-github"
+    key    = "newrelic/terrafor.tfstate"
+    region = "us-east-1"
+  }
 }
 # Configure the New Relic provider
 provider "newrelic" {
