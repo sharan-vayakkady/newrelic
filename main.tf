@@ -23,6 +23,7 @@ variable "newrelic_api_key" {
 
 provider "newrelic" {
   api_key = var.newrelic_api_key
+  account_id = 3954397
 }
 
 resource "newrelic_synthetics_monitor" "example_monitor" {
