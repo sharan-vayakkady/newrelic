@@ -8,7 +8,7 @@ terraform {
 }
 # Configure the New Relic provider
 provider "newrelic" {
-  api_key = "92580C3C0C3CA75918151D8CACCB6A301946C4935E9C6E9D5189A6A19F7FA5CD"
+  api_key = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
   account_id  = "3954397"
 }
 
