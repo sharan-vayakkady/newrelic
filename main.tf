@@ -33,34 +33,35 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
 resource "newrelic_alert_channel" "slack_channel" {
   name   = "slack-channel"
   type   = "slack"
-  config = {
+  config {
     webhook_url = "https://hooks.slack.com/services/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"
   }
 }
 
 # Create an alert policy for the monitor
 resource "newrelic_alert_policy" "monitor_failure_policy" {
-  name        = "Monitor Failure"
-  incident_preference = "PER_POLICY"
+  name                  = "Monitor Failure"
+  incident_preference   = "PER_POLICY"
+  notification_channel_ids = [newrelic_alert_channel.slack_channel.id]
 }
 
 # Create an alert condition for the monitor
 resource "newrelic_alert_condition" "monitor_failure_condition" {
-  policy_id   = newrelic_alert_policy.monitor_failure_policy.id
-  name        = "Monitor Failure"
-  enabled     = true
-  type        = "static"
+  policy_id = newrelic_alert_policy.monitor_failure_policy.id
+  name      = "Monitor Failure"
+  enabled   = true
+  type      = "static"
   entities {
-    name  = newrelic_synthetics_monitor.flipkart_com_monitor.name
-    type  = "Monitor"
+    name = newrelic_synthetics_monitor.flipkart_com_monitor.name
+    type = "Monitor"
   }
-  
-  terms {
-    duration          = 1
-    priority          = "critical"
-    operator          = "above"
-    threshold         = 0
-    time_function     = "all"
-    waiting_duration  = 0
+
+  term {
+    duration         = 1
+    priority         = "critical"
+    operator         = "above"
+    threshold        = 0
+    time_function    = "all"
+    waiting_duration = 0
   }
 }
