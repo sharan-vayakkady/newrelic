@@ -31,10 +31,10 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
 
 # Create a notification channel for Slack
 resource "newrelic_alert_channel" "slack_channel" {
-  name   = "slack-channel"
-  type   = "slack"
+  name = "slack-channel"
+  type = "slack"
   config {
-    webhook_url = "https://hooks.slack.com/services/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"
+    api_url = "https://hooks.slack.com/services/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"
   }
 }
 
@@ -42,7 +42,6 @@ resource "newrelic_alert_channel" "slack_channel" {
 resource "newrelic_alert_policy" "monitor_failure_policy" {
   name                  = "Monitor Failure"
   incident_preference   = "PER_POLICY"
-  notification_channel_ids = [newrelic_alert_channel.slack_channel.id]
 }
 
 # Create an alert condition for the monitor
