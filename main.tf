@@ -41,8 +41,7 @@ resource "newrelic_alert_channel" "slack_channel" {
 # Create an alert policy for the monitor
 resource "newrelic_alert_policy" "monitor_failure_policy" {
   name                 = "Monitor Failure"
-  violation_time_limit = 5
-  evaluation_offset    = 0
+  
 }
 
 # Create an alert condition for the policy
