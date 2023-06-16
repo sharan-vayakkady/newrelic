@@ -71,7 +71,6 @@ resource "newrelic_alert_condition" "flipkart_monitor_condition" {
   policy_id            = newrelic_alert_policy.flipkart_monitor_policy.id
   type                 = "synthetic_monitor"
   enabled              = true
-  runbook_url          = "https://runbook.example.com"
   violation_close_timer = 10
 
   entities {
