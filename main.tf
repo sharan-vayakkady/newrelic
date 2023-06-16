@@ -9,6 +9,7 @@ terraform {
 # Configure the New Relic provider
 provider "newrelic" {
   api_key = "92580C3C0C3CA75918151D8CACCB6A301946C4935E9C6E9D5189A6A19F7FA5CD"
+  account_id  = "3954397"
 }
 
 # Create a synthetic monitor
