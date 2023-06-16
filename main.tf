@@ -4,6 +4,10 @@ terraform {
       source  = "newrelic/newrelic"
       version = "2.15.0"
     }
+    http = {
+      source = "hashicorp/http"
+      version = "2.1.0"
+    }
   }
   backend "s3" {
     bucket = "ssv-github"
@@ -35,12 +39,16 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
 }
 
 # Configure email notification channel using New Relic REST API
+provider "http" {
+  follow_redirects = true
+}
+
 data "http" "create_notification_channel" {
   url = "https://synthetics.newrelic.com/synthetics/api/v3/monitors/${newrelic_synthetics_monitor.flipkart_com_monitor.id}/notification-channels"
-  method = "POST"
+  method  = "POST"
   headers = {
-    "Api-Key" = var.newrelic_api_key
-    "Content-Type" = "application/json"
+    "Api-Key"       = var.newrelic_api_key
+    "Content-Type"  = "application/json"
   }
   body = jsonencode({
     name = "Email Notification Channel"
