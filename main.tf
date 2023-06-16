@@ -7,7 +7,7 @@ terraform {
   }
   backend "s3" {
     bucket = "ssv-github"
-    key    = "newrelic/terrafor.tfstate"
+    key    = "newrelic/terraform.tfstate"
     region = "us-east-1"
   }
 }
