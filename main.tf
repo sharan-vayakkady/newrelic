@@ -27,44 +27,17 @@ resource "newrelic_synthetics_monitor" "flipkart_com_monitor" {
   locations     = ["AWS_US_WEST_1"]
   status        = "ENABLED"
   sla_threshold = 7.0
+
+  notification_channels = [
+  newrelic_synthetics_notification_channel.email_channel.id
+   ]
 }
 
-# Create a notification channel for Slack
-resource "newrelic_alert_channel" "slack_channel" {
-  name = "slack-channel"
-  type = "slack"
-  config {
-    webhook_url = "https://hooks.slack.com/services/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"
+
+resource "newrelic_synthetics_notification_channel" "email_channel" {
+  name     = "Email Notification Channel"
+  type     = "Email"
+  settings = {
+    email = "sharan.vayakkady@gmail.com"
   }
-}
-
-# Create an alert policy for the monitor
-resource "newrelic_alert_policy" "monitor_failure_policy" {
-  name                 = "Monitor Failure"
-}
-
-# Create an alert condition for the policy
-resource "newrelic_alert_condition" "monitor_failure_condition" {
-  policy_id = newrelic_alert_policy.monitor_failure_policy.id
-
-  name    = "Monitor Failure"
-  enabled = true
-
-  metric    = "duration"
-  entities  = ["monitor"]
-  type      = "static"
-  
-  term {
-    duration      = 1
-    priority      = "critical"
-    operator      = "above"
-    threshold     = 0
-    time_function = "all"
-  }
-}
-
-# Associate the alert channel with the policy
-resource "newrelic_alert_policy_channel" "monitor_failure_channel" {
-  policy_id   = newrelic_alert_policy.monitor_failure_policy.id
-  channel_ids = [newrelic_alert_channel.slack_channel.id]
 }
