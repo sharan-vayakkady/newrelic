@@ -1,6 +1,13 @@
+terraform {
+  required_providers {
+    newrelic = {
+      source  = "newrelic/newrelic"
+      version = "2.15.0"
+    }
+  }
+}
 # Configure the New Relic provider
 provider "newrelic" {
-  version = "2.15.0"
   api_key = "92580C3C0C3CA75918151D8CACCB6A301946C4935E9C6E9D5189A6A19F7FA5CD"
 }
 
