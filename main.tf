@@ -33,7 +33,6 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
     uri = "https://www.amazon.com"
   }
 }
-}
 
 resource "newrelic_alert_channel" "email" {
   name = "email"
