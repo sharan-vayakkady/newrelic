@@ -44,7 +44,7 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
   name             = "Ping Monitor Failure"
   policy_id        = newrelic_alert_policy.amazon_alerts.id
   enabled          = true
-  type             = "static"
+  type             = "servers_metric"
   entities         = [newrelic_synthetics_monitor.ping_monitor.id]
   metric           = "failure_rate"
   term {
