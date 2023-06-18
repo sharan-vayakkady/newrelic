@@ -10,12 +10,14 @@ terraform {
     key    = "newrelic/terraform.tfstate"
     region = "us-east-1"
   }
+}
 
-}
 provider "newrelic" {
-  account_id = 3954397
-  api_key = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
+  api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
+  api_base   = "https://api.newrelic.com"
+  auth_header = "Bearer"
 }
+
 # Create an alert policy
 resource "newrelic_alert_policy" "alert" {
   name = "Your Concise Alert Name"
@@ -32,7 +34,6 @@ resource "newrelic_synthetics_monitor" "amazon_com_monitor" {
 
 resource "newrelic_alert_condition" "monitor_failure_condition" {
   policy_id = newrelic_alert_policy.alert.id
-  type      = "static"
   name      = "Monitor Failure"
   enabled   = true
 
@@ -48,12 +49,11 @@ resource "newrelic_alert_condition" "monitor_failure_condition" {
 }
 
 resource "newrelic_notification_channel" "email" {
-  name = "email"
-  type = "email"
+  name     = "email"
+  type     = "email"
 
   config {
-    recipients              = "sharan.vayakkady@gmail.com"
-    include_json_attachment = true
+    email_recipients = "sharan.vayakkady@gmail.com"
   }
 }
 
