@@ -54,13 +54,6 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
     operator             = "above"
     priority             = "critical"
     waiting_function     = "all"
-    time_aggregation     = "all"
-    evaluation_offset    = 0
-    aggregation_window   = 0
-    ignore_overlap       = true
-    user_defined_metric  = ""
-    metric_type          = "absolute"
-    total_seconds        = 600
   }
 }
 
