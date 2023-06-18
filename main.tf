@@ -46,9 +46,3 @@ resource "newrelic_synthetics_alert_condition" "ping_monito_conditionr" {
   monitor_id  = newrelic_synthetics_monitor.ping_monitor.id
   runbook_url = "https://www.example.com"
 }
-
-# Link the channel to the policy
-resource "newrelic_alert_policy_channel" "alert_email" {
-  policy_id    = newrelic_alert_policy.amazon_alerts.id
-  channel_ids  = [newrelic_alert_channel.email1.id]
-}
