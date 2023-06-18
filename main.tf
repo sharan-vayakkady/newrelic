@@ -45,23 +45,12 @@ resource "newrelic_alert_policy" "amazon_alerts" {
   name = "amazon alert"
 }
 
-resource "newrelic_alert_condition" "ping_monitor_condition" {
+resource "newrelic_synthetics_alert_condition" "ping_monito_conditionr" {
   policy_id = newrelic_alert_policy.amazon_alerts.id
 
-  name        = "Ping Monitor Failure"
+  name        = "ping monitor"
+  monitor_id  = newrelic_synthetics_monitor.ping_monitor.id
   runbook_url = "https://www.example.com"
-
-  term {
-    duration      = 5
-    operator      = "below"
-    priority      = "critical"
-    threshold     = "0.75"
-    time_function = "all"
-  }
-  entities {
-    type  = "MONITOR"
-    id    = newrelic_synthetics_monitor.ping_monitor.id
-  }
 }
 
 # Link the channel to the policy
