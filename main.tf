@@ -20,12 +20,8 @@ provider "newrelic" {
 resource "newrelic_synthetics_monitor" "ping_monitor" {
   name              = "Amazon Ping Monitor"
   type              = "SIMPLE"
-  frequency         = 15
   uri               = "https://www.sharan.com"
-  locations         = ["AWS_US_WEST_1"]
   status            = "ENABLED"
-  sla_threshold     = 7.0
-  sla_failures_only = true
 }
 
 resource "newrelic_alert_channel" "email" {
