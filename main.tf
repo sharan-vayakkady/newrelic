@@ -18,13 +18,18 @@ provider "newrelic" {
 }
 
 resource "newrelic_synthetics_monitor" "ping_monitor" {
-  name              = "Amazon Ping Monitor"
-  type              = "SIMPLE"
-  uri               = "https://www.sharan.com"
-  locations_public  = ["AWS_US_WEST_1"]  # Updated attribute name
-  status            = "ENABLED"
-}
+  status           = "ENABLED"
+  name             = "monitor"
+  period           = "EVERY_MINUTE"
+  uri              = "https://amazon.com"
+  type             = "SIMPLE"
+  locations_public = ["AP_SOUTH_1"]
 
+  treat_redirect_as_failure = true
+  validation_string         = "success"
+  bypass_head_request       = true
+  verify_ssl                = true
+}
 resource "newrelic_alert_channel" "email" {
   name = "email"
   type = "email"
@@ -41,18 +46,21 @@ resource "newrelic_alert_policy" "amazon_alerts" {
 }
 
 resource "newrelic_alert_condition" "ping_monitor_condition" {
-  name             = "Ping Monitor Failure"
-  policy_id        = newrelic_alert_policy.amazon_alerts.id
-  enabled          = true
-  type             = "servers_metric"
-  entities         = [newrelic_synthetics_monitor.ping_monitor.id]
-  metric           = "failure_rate"
+  policy_id = newrelic_alert_policy.amazon_alerts.id
+
+  name        = "Ping Monitor Failure"
+  type        = "apm_app_metric"
+  entities    = [newrelic_synthetics_monitor.ping_monitor.id]
+  metric      = "apdex"
+  runbook_url = "https://www.example.com"
+  condition_scope = "application"
+
   term {
-    threshold            = 0
-    time_function        = "all"
-    duration             = 5
-    operator             = "above"
-    priority             = "critical"
+    duration      = 5
+    operator      = "below"
+    priority      = "critical"
+    threshold     = "0.75"
+    time_function = "all"
   }
 }
 
