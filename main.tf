@@ -5,6 +5,7 @@ terraform {
       version = "3.24.2"
     }
   }
+}
 provider "newrelic" {
   api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
   account_id = 3954397
