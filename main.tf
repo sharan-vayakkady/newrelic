@@ -37,3 +37,26 @@ resource "newrelic_synthetics_alert_condition" "ping_monito_conditionr" {
   monitor_id  = newrelic_synthetics_monitor.ping_monitor.id
   runbook_url = "https://www.example.com"
 }
+resource "newrelic_notification_channel" "email_channel" {
+  account_id = 
+  name = "email-channel"
+  type = "EMAIL"
+  destination_id = "sharan.vayakkady@gmail.com"
+  product = "IINT"
+
+  property {
+    key = "Website down"
+    value = "website is down"
+  }
+
+  property {
+    key = "customDetailsEmail"
+    value = "issue id - {{issueId}}"
+  }
+}
+resource "newrelic_alert_policy_channel" "email_policy" {
+  policy_id  = data.newrelic_alert_policy.amazon_alerts.id
+  channel_ids = [
+    newrelic_notification_channel.email_channel.id
+  ]
+}
