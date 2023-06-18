@@ -50,9 +50,3 @@ resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
   runbook_url  = "https://www.example.com"
 }
 
-resource "newrelic_alert_policy_channel" "email_policy" {
-  policy_id    = newrelic_alert_policy.amazon_alerts.id
-  channel_ids = [
-    newrelic_alert_channel.email_channel.id
-  ] 
-}
