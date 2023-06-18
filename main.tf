@@ -61,5 +61,7 @@ resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
 
 resource "newrelic_alert_policy_channel" "email_policy" {
   policy_id    = newrelic_alert_policy.amazon_alerts.id
-  channel_ids  = [newrelic_notification_channel.email_channel.id]
+  channel_ids = [
+    newrelic_notification_channel.email_channel.id
+  ] 
 }
