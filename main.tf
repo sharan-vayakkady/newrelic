@@ -35,7 +35,7 @@ resource "newrelic_alert_channel" "email1" {
   type = "email"
 
   config {
-    recipients              = "sharan.vayakkady@gmail.com"
+    recipients              = "sharansv1993@gmail.com"
     include_json_attachment = true  # Updated attribute value
   }
 }
