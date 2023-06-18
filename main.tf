@@ -58,7 +58,7 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
     threshold     = "0.75"
     time_function = "all"
   }
-  entity {
+  entities {
     type  = "MONITOR"
     id    = newrelic_synthetics_monitor.ping_monitor.id
   }
