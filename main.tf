@@ -17,21 +17,15 @@ provider "newrelic" {
   account_id = 3954397
 }
 
-
-
-# Create a synthetic monitor
 resource "newrelic_synthetics_monitor" "ping_monitor" {
-  name       = "Amazon Ping Monitor"
-  frequency  = 5
-  locations  = ["AWS_US_WEST_1"]
-  status     = "ENABLED"
-
-  type       = "SIMPLE"
-  subtype    = "PING"
-
-  config {
-    uri = "https://www.amazon.com"
-  }
+  name              = "Amazon Ping Monitor"
+  type              = "SIMPLE"
+  frequency         = 15
+  uri               = "https://www.sharan.com"
+  locations         = ["AWS_US_WEST_1"]
+  status            = "ENABLED"
+  sla_threshold     = 7.0
+  sla_failures_only = true
 }
 
 resource "newrelic_alert_channel" "email" {
