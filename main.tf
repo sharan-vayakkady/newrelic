@@ -1,3 +1,21 @@
+terraform {
+  required_providers {
+    newrelic = {
+      source  = "newrelic/newrelic"
+      version = "3.24.2"
+    }
+  }
+  backend "s3" {
+    bucket = "ssv-github"
+    key    = "newrelic/terraform.tfstate"
+    region = "us-east-1"
+  }
+
+}
+provider "newrelic" {
+  account_id = 3954397
+  api_key = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
+}
 # Create an alert policy
 resource "newrelic_alert_policy" "alert" {
   name = "Your Concise Alert Name"
