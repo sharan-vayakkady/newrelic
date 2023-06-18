@@ -37,6 +37,11 @@ resource "newrelic_synthetics_alert_condition" "ping_monito_conditionr" {
   monitor_id  = newrelic_synthetics_monitor.ping_monitor.id
   runbook_url = "https://www.example.com"
 }
+
+data "newrelic_alert_policy" "amazon_alerts" {
+  name = "amazon alert"
+}
+
 resource "newrelic_notification_channel" "email_channel" {
   account_id = 3954397
   name = "email_channel_notification"
@@ -54,6 +59,7 @@ resource "newrelic_notification_channel" "email_channel" {
     value = "issue id - {{issueId}}"
   }
 }
+
 resource "newrelic_alert_policy_channel" "email_policy" {
   policy_id  = data.newrelic_alert_policy.amazon_alerts.id
   channel_ids = [
