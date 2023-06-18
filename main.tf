@@ -57,9 +57,7 @@ resource "newrelic_notification_channel" "email_channel" {
 }
 
 resource "newrelic_alert_policy_channel" "email_policy" {
-  policy_id  = [ 
-    newrelic_alert_policy.amazon_alerts.id
-  ]
+  policy_id  = newrelic_alert_policy.amazon_alerts.id
   channel_ids = [
     newrelic_notification_channel.email_channel.id
   ]
