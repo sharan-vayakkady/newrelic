@@ -50,7 +50,7 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
 
   name        = "Ping Monitor Failure"
   type        = "apm_app_metric"
-  entities    = [newrelic_synthetics_monitor.ping_monitor.id]
+  entities    = [tonumber(newrelic_synthetics_monitor.ping_monitor.id)]
   metric      = "apdex"
   runbook_url = "https://www.example.com"
   condition_scope = "application"
