@@ -45,7 +45,11 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
 }
 
 resource "newrelic_alert_policy" "amazon_alerts" {
-  name = "amazon alert"
+  name                = "amazon alert"
+  incident_preference = "PER_CONDITION"
+  channel_ids = [
+    newrelic_notification_channel.email_channel.id
+  ]
 }
 
 resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
