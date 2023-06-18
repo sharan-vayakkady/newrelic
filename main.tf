@@ -53,7 +53,6 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
     duration             = 5
     operator             = "above"
     priority             = "critical"
-    waiting_function     = "all"
   }
 }
 
