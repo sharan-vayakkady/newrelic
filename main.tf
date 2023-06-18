@@ -14,8 +14,7 @@ terraform {
 
 provider "newrelic" {
   api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
-  api_base   = "https://api.newrelic.com"
-  auth_header = "Bearer"
+  account_id = 3954397
 }
 
 # Create an alert policy
