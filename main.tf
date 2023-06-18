@@ -30,7 +30,7 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
   bypass_head_request       = true
   verify_ssl                = true
 }
-resource "newrelic_alert_channel" "email" {
+resource "newrelic_alert_channel" "email1" {
   name = "email"
   type = "email"
 
@@ -56,5 +56,5 @@ resource "newrelic_synthetics_alert_condition" "ping_monito_conditionr" {
 # Link the channel to the policy
 resource "newrelic_alert_policy_channel" "alert_email" {
   policy_id    = newrelic_alert_policy.amazon_alerts.id
-  channel_ids  = [newrelic_alert_channel.email.id]
+  channel_ids  = [newrelic_alert_channel.email1.id]
 }
