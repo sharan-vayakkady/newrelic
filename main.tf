@@ -29,24 +29,13 @@ resource "newrelic_synthetics_monitor" "amazon_com_monitor" {
   sla_threshold = 7.0
 }
 
-# Create a notification channel for Slack
-resource "newrelic_alert_channel" "slack_channel" {
-  name   = "slack-channel"
-  type   = "slack"
-  slack {
-    webhook_url = "https://hooks.slack.com/services/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"
-  }
-}
-
-# Create an alert policy for the monitor
-resource "newrelic_alert_policy" "monitor_failure_policy" {
-  name                 = "Monitor Failure"
-  violation_time_limit = 5
-  evaluation_offset    = 0
+# Create an alert policy
+resource "newrelic_alert_policy" "alert" {
+  name = "Your Concise Alert Name"
 }
 
 resource "newrelic_alert_condition" "monitor_failure_condition" {
-  policy_id = newrelic_alert_policy.monitor_failure_policy.id
+  policy_id = newrelic_alert_policy.alert.id
 
   name    = "Monitor Failure"
   enabled = true
@@ -60,7 +49,20 @@ resource "newrelic_alert_condition" "monitor_failure_condition" {
   }
 }
 
-resource "newrelic_alert_channel_policy" "monitor_failure_channel_policy" {
-  policy_id    = newrelic_alert_policy.monitor_failure_policy.id
-  channel_ids = [newrelic_alert_channel.slack_channel.id]
+resource "newrelic_alert_channel" "email" {
+  name = "email"
+  type = "email"
+
+  config {
+    recipients              = "sharan.vayakkady@gmail.com"
+    include_json_attachment = true
+  }
+}
+
+# Link the channel to the policy
+resource "newrelic_alert_policy_channel" "alert_email" {
+  policy_id  = newrelic_alert_policy.alert.id
+  channel_ids = [
+    newrelic_alert_channel.email.id
+  ]
 }
