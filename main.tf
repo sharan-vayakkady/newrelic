@@ -24,15 +24,6 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
   bypass_head_request       = true
   verify_ssl                = true
 }
-resource "newrelic_alert_channel" "email1" {
-  name = "email"
-  type = "email"
-
-  config {
-    recipients              = "sharansv1993@gmail.com"
-    include_json_attachment = true  # Updated attribute value
-  }
-}
 
 # Create an alert policy
 resource "newrelic_alert_policy" "amazon_alerts" {
