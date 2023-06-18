@@ -47,8 +47,7 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
   type             = "static"
   entities         = [newrelic_synthetics_monitor.ping_monitor.id]
   metric           = "failure_rate"
-  violation_time_limit_seconds = 600
-  terms {
+  term {
     threshold = 0
     duration  = 5
     operator  = "above"
