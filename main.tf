@@ -49,11 +49,7 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
   policy_id = newrelic_alert_policy.amazon_alerts.id
 
   name        = "Ping Monitor Failure"
-  type        = "apm_app_metric"
-  entities    = "newrelic_synthetics_monitor.ping_monitor.id"
-  metric      = "apdex"
   runbook_url = "https://www.example.com"
-  condition_scope = "application"
 
   term {
     duration      = 5
@@ -61,6 +57,10 @@ resource "newrelic_alert_condition" "ping_monitor_condition" {
     priority      = "critical"
     threshold     = "0.75"
     time_function = "all"
+  }
+  entity {
+    type  = "MONITOR"
+    id    = newrelic_synthetics_monitor.ping_monitor.id
   }
 }
 
