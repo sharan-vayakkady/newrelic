@@ -38,8 +38,8 @@ resource "newrelic_synthetics_alert_condition" "ping_monito_conditionr" {
   runbook_url = "https://www.example.com"
 }
 resource "newrelic_notification_channel" "email_channel" {
-  account_id = 
-  name = "email-channel"
+  account_id = 3954397
+  name = "email_channel_notification"
   type = "EMAIL"
   destination_id = "sharan.vayakkady@gmail.com"
   product = "IINT"
