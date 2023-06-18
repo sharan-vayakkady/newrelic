@@ -12,24 +12,15 @@ provider "newrelic" {
   account_id = 3954397
 }
 
-resource "newrelic_notification_channel" "email_channel" {
-  account_id      = 3954397
-  name            = "email_channel_notification"
-  type            = "EMAIL"
-  destination_id  = "sharan.vayakkady@gmail.com"
-  product         = "IINT"
+resource "newrelic_alert_channel" "email_channel" {
+  name = "email_channel_nalert"
+  type = "email"
 
-  property {
-    key   = "Website down"
-    value = "website is down"
-  }
-
-  property {
-    key   = "customDetailsEmail"
-    value = "issue id - {{issueId}}"
+  config {
+    recipients              = "sharan.vayakkady@gmail.com"
+    include_json_attachment = "true"
   }
 }
-
 resource "newrelic_synthetics_monitor" "ping_monitor" {
   status           = "ENABLED"
   name             = "monitor"
@@ -48,7 +39,7 @@ resource "newrelic_alert_policy" "amazon_alerts" {
   name                = "amazon alert"
   incident_preference = "PER_CONDITION"
   channel_ids = [
-    newrelic_notification_channel.email_channel.id
+    newrelic_alert_channel.email_channel.id
   ]
 }
 
@@ -62,6 +53,6 @@ resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
 resource "newrelic_alert_policy_channel" "email_policy" {
   policy_id    = newrelic_alert_policy.amazon_alerts.id
   channel_ids = [
-    newrelic_notification_channel.email_channel.id
+    newrelic_alert_channel.email_channel.id
   ] 
 }
