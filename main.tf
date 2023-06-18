@@ -21,6 +21,7 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
   name              = "Amazon Ping Monitor"
   type              = "SIMPLE"
   uri               = "https://www.sharan.com"
+  locations_public  = ["AWS_US_WEST_1"]
   status            = "ENABLED"
 }
 
