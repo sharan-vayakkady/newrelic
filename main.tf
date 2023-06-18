@@ -17,47 +17,61 @@ provider "newrelic" {
   account_id = 3954397
 }
 
+
+
+# Create a synthetic monitor
+resource "newrelic_synthetics_monitor" "ping_monitor" {
+  name       = "Amazon Ping Monitor"
+  frequency  = 5
+  locations  = ["AWS_US_WEST_1"]
+  status     = "ENABLED"
+
+  type       = "SIMPLE"
+  subtype    = "PING"
+
+  config {
+    uri = "https://www.amazon.com"
+  }
+}
+}
+
+resource "newrelic_alert_channel" "email" {
+  name = "email"
+  type = "email"
+
+  config {
+    recipients              = "sharan.vayakkady@gmail.com"
+    include_json_attachment = "1"
+  }
+}
+
 # Create an alert policy
-resource "newrelic_alert_policy" "alert" {
-  name = "Your Concise Alert Name"
+resource "newrelic_alert_policy" "amazon_alerts" {
+  name = "amazon alert"
 }
 
-resource "newrelic_synthetics_monitor" "amazon_com_monitor" {
-  name          = "amazon.com ping"
-  type          = "SIMPLE"
-  frequency     = 15
-  uri           = "https://www.amazon.com"
-  locations     = ["AWS_US_WEST_1"]
-  status        = "ENABLED"
-}
-
-resource "newrelic_alert_condition" "monitor_failure_condition" {
-  policy_id = newrelic_alert_policy.alert.id
-  name      = "Monitor Failure"
-  enabled   = true
-
-  entities = [newrelic_synthetics_monitor.amazon_com_monitor.id]
-
-  term {
-    duration      = 1
-    priority      = "critical"
-    operator      = "above"
-    threshold     = 0
+resource "newrelic_alert_condition" "ping_monitor_condition" {
+  name             = "Ping Monitor Failure"
+  policy_id        = newrelic_alert_policy.amazon_alerts.id
+  enabled          = true
+  type             = "static"
+  entities         = [newrelic_synthetics_monitor.ping_monitor.id]
+  metric           = "failure_rate"
+  violation_time_limit_seconds = 600
+  terms {
+    threshold = 0
+    duration  = 5
+    operator  = "above"
+    priority  = "critical"
     time_function = "all"
   }
 }
 
-resource "newrelic_notification_channel" "email" {
-  name     = "email"
-  type     = "email"
-
-  config {
-    email_recipients = "sharan.vayakkady@gmail.com"
-  }
-}
 
 # Link the channel to the policy
 resource "newrelic_alert_policy_channel" "alert_email" {
-  policy_id   = newrelic_alert_policy.alert.id
-  channel_ids = [newrelic_notification_channel.email.id]
+  policy_id  = newrelic_alert_policy.amazon_alerts.id
+  channel_ids = [
+    newrelic_alert_channel.email.id
+  ]
 }
