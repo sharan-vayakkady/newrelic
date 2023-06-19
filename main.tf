@@ -12,13 +12,21 @@ provider "newrelic" {
   account_id = 3954397
 }
 
-resource "newrelic_alert_channel" "email_channel" {
-  name = "email_channel_nalert"
-  type = "email"
+resource "newrelic_notification_channel" "email_channel" {
+  account_id = 3954397
+  name = "email-example"
+  type = "EMAIL"
+  destination_id = "sharan.vayakkady@gmail.com"
+  product = "IINT"
 
-  config {
-    recipients              = "sharan.vayakkady@gmail.com"
-    include_json_attachment = "true"
+  property {
+    key = "subject"
+    value = "monitor down"
+  }
+
+  property {
+    key = "customDetailsEmail"
+    value = "issue id - {{issueId}}"
   }
 }
 resource "newrelic_synthetics_monitor" "ping_monitor" {
