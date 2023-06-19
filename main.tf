@@ -62,4 +62,23 @@ resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
   monitor_id   = newrelic_synthetics_monitor.ping_monitor.id
   runbook_url  = "https://www.example.com"
 }
+resource "newrelic_workflow" "my_workflow" {
+  name = "my_workflow"
+  muting_rules_handling = "NOTIFY_ALL_ISSUES"
+
+  issues_filter {
+    name = "my_filter"
+    type = "FILTER"
+
+    predicate {
+      attribute = "accumulations.tag.team"
+      operator = "EXACTLY_MATCHES"
+      values = [ "growth" ]
+    }
+  }
+
+  destination {
+    channel_id = newrelic_notification_channel.email_notification.id
+  }
+}
 
