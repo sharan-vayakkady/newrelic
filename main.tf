@@ -10,7 +10,6 @@ provider "newrelic" {
   api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
   account_id = 3954397
 }
-
 resource "newrelic_alert_policy" "domain_alerts" {
   name                = "my_policy"
   incident_preference = "PER_CONDITION"
