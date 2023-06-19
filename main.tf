@@ -47,7 +47,7 @@ resource "newrelic_alert_policy" "amazon_alerts" {
   name                = "amazon alert"
   incident_preference = "PER_CONDITION"
   channel_ids = [
-    newrelic_alert_channel.email_channel.id
+    newrelic_notification_channel.email_channel.id
   ]
 }
 
