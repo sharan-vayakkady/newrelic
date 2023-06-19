@@ -2,7 +2,7 @@ terraform {
   required_providers {
     newrelic = {
       source  = "newrelic/newrelic"
-      version = "2.37.0"
+      version = "3.24.2"
     }
   }
 }
@@ -38,7 +38,7 @@ resource "newrelic_alert_policy" "amazon_alerts" {
   name                = "amazon alert"
   incident_preference = "PER_CONDITION"
   channel_ids = [
-    newrelic_notification_channel.email_channel.id
+    newrelic_alert_channel.email_channel.id
   ]
 }
 
