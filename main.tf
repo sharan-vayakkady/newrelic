@@ -69,7 +69,7 @@ resource "newrelic_workflow" "my_workflow" {
     type = "FILTER"
 
     predicate {
-      attribute = "labels.policyIDs"
+      attribute = "labels.policyIds"
       operator = "EXACTLY_MATCHES"
       values = [ newrelic_alert_policy.domain_alerts.id ]
     }
