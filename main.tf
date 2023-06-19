@@ -64,7 +64,16 @@ resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
 resource "newrelic_workflow" "my_workflow" {
   name = "my_workflows"
   muting_rules_handling = "NOTIFY_ALL_ISSUES"
+  issues_filter {
+    name = "my_filter"
+    type = "FILTER"
 
+    predicate {
+      attribute = "labels.policyIDs"
+      operator = "EXACTLY_MATCHES"
+      values = [ newrelic_alert_policy.domain_alerts.id ]
+    }
+  }
   destination {
     channel_id = newrelic_notification_channel.email_notification.id
   }
