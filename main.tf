@@ -11,13 +11,13 @@ provider "newrelic" {
   api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
   account_id = 3954397
 }
-resource "newrelic_alert_channel" "email_channel" {
-  name = "email-example"
-  type = "email"
+resource "newrelic_alert_channel" "slack_channel" {
+  name = "slack-example"
+  type = "slack"
 
   config {
-    recipients              = "sharan.vayakkady@gmail.com"
-    include_json_attachment = "true"
+    url     = "https://hooks.slack.com/services/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"
+    channel = "sharan_github_notifications"
   }
 }
 resource "newrelic_synthetics_monitor" "ping_monitor" {
