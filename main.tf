@@ -11,13 +11,13 @@ provider "newrelic" {
   account_id = 3954397
 }
 
-resource "newrelic_alert_policy" "amazon_alerts" {
-  name                = "amazon alert"
+resource "newrelic_alert_policy" "domain_alerts" {
+  name                = "my_policy"
   incident_preference = "PER_CONDITION"
 }
 resource "newrelic_notification_destination" "email_destination" {
   account_id = 3954397
-  name = "email-example"
+  name = "my_destination"
   type = "EMAIL"
 
   property {
@@ -25,16 +25,16 @@ resource "newrelic_notification_destination" "email_destination" {
     value = "sharan.vayakkady@gmail.com"
   }
 }
-resource "newrelic_notification_channel" "foo" {
+resource "newrelic_notification_channel" "email_notification" {
   account_id = 3954397
-  name = "email-example"
+  name = "my_notification_channel"
   type = "EMAIL"
   destination_id = newrelic_notification_destination.email_destination.id
   product = "IINT"
 
   property {
     key = "subject"
-    value = "New Subject Title"
+    value = "Monitor down"
   }
 
   property {
@@ -46,7 +46,7 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
   status           = "ENABLED"
   name             = "monitor"
   period           = "EVERY_MINUTE"
-  uri              = "https://amazon.com"
+  uri              = "https://sharan12345.com"
   type             = "SIMPLE"
   locations_public = ["AP_SOUTH_1"]
 
@@ -57,8 +57,8 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
 }
 
 resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
-  policy_id    = newrelic_alert_policy.amazon_alerts.id
-  name         = "ping monitor"
+  policy_id    = newrelic_alert_policy.domain_alerts.id
+  name         = "my_condition"
   monitor_id   = newrelic_synthetics_monitor.ping_monitor.id
   runbook_url  = "https://www.example.com"
 }
