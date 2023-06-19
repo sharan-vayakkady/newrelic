@@ -17,15 +17,6 @@ resource "newrelic_alert_policy" "amazon_alerts" {
   name                = "amazon alert"
   incident_preference = "PER_CONDITION"
 }
-resource "newrelic_alert_channel" "slack_channel" {
-  name = "slack-example"
-  type = "slack"
-
-  config {
-    url     = "https://hooks.slack.com/services/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"
-    channel = "sharan_github_notifications"
-  }
-}
 resource "newrelic_synthetics_monitor" "ping_monitor" {
   status           = "ENABLED"
   name             = "monitor"
