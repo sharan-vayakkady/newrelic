@@ -27,7 +27,7 @@ resource "newrelic_notification_destination" "email_destination" {
   }
 }
 resource "newrelic_notification_channel" "foo" {
-  account_id = 12345678
+  account_id = 3954397
   name = "email-example"
   type = "EMAIL"
   destination_id = newrelic_notification_destination.email_destination.id
