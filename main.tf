@@ -15,7 +15,7 @@ provider "newrelic" {
 resource "newrelic_alert_policy" "amazon_alerts" {
   name                = "amazon alert"
   incident_preference = "PER_CONDITION"
-
+}
 resource "newrelic_notification_destination" "email_destination" {
   account_id = 3954397
   name = "email-example"
