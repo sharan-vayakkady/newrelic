@@ -65,17 +65,6 @@ resource "newrelic_workflow" "my_workflow" {
   name = "my_workflows"
   muting_rules_handling = "NOTIFY_ALL_ISSUES"
 
-  issues_filter {
-    name = "my_filter"
-    type = "FILTER"
-
-    predicate {
-      attribute = "accumulations.tag.team"
-      operator = "EXACTLY_MATCHES"
-      values = [ "growth" ]
-    }
-  }
-
   destination {
     channel_id = newrelic_notification_channel.email_notification.id
   }
