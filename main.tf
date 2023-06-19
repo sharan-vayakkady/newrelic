@@ -13,7 +13,7 @@ provider "newrelic" {
 }
 
 resource "newrelic_notification_channel" "email_channel" {
-  account_id = toString(3954397)
+  account_id = tostring(3954397)
   name = "email-example"
   type = "EMAIL"
   destination_id = "sharan.vayakkady@gmail.com"
