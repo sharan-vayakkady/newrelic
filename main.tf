@@ -11,6 +11,11 @@ provider "newrelic" {
   api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
   account_id = 3954397
 }
+
+resource "newrelic_alert_policy" "amazon_alerts" {
+  name                = "amazon alert"
+  incident_preference = "PER_CONDITION"
+}
 resource "newrelic_alert_channel" "slack_channel" {
   name = "slack-example"
   type = "slack"
@@ -32,14 +37,6 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
   validation_string         = "success"
   bypass_head_request       = true
   verify_ssl                = true
-}
-
-resource "newrelic_alert_policy" "amazon_alerts" {
-  name                = "amazon alert"
-  incident_preference = "PER_CONDITION"
-  channel_ids = [
-    newrelic_alert_channel.slack_channel.id
-  ]
 }
 
 resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
