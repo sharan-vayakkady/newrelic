@@ -2,7 +2,7 @@ terraform {
   required_providers {
     newrelic = {
       source  = "newrelic/newrelic"
-      version = "3.2.0"
+      version = "2.37.0"
     }
   }
 }
@@ -11,22 +11,13 @@ provider "newrelic" {
   api_key    = "NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL"
   account_id = 3954397
 }
-
-resource "newrelic_notification_channel" "email_channel" {
-  account_id = 3954397
+resource "newrelic_alert_channel" "email_channel" {
   name = "email-example"
-  type = "EMAIL"
-  destination_id = "sharan.vayakkady@gmail.com"
-  product = "IINT"
+  type = "email"
 
-  property {
-    key = "subject"
-    value = "monitor down"
-  }
-
-  property {
-    key = "customDetailsEmail"
-    value = "issue id - {{issueId}}"
+  config {
+    recipients              = "sharan.vayakkady@gmail.com"
+    include_json_attachment = "true"
   }
 }
 resource "newrelic_synthetics_monitor" "ping_monitor" {
