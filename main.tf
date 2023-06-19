@@ -15,6 +15,33 @@ provider "newrelic" {
 resource "newrelic_alert_policy" "amazon_alerts" {
   name                = "amazon alert"
   incident_preference = "PER_CONDITION"
+
+resource "newrelic_notification_destination" "email_destination" {
+  account_id = 3954397
+  name = "email-example"
+  type = "EMAIL"
+
+  property {
+    key = "email"
+    value = "sharan.vayakkady@gmail.com"
+  }
+}
+resource "newrelic_notification_channel" "foo" {
+  account_id = 12345678
+  name = "email-example"
+  type = "EMAIL"
+  destination_id = newrelic_notification_destination.email_destination.id
+  product = "IINT"
+
+  property {
+    key = "subject"
+    value = "New Subject Title"
+  }
+
+  property {
+    key = "customDetailsEmail"
+    value = "issue id - {{issueId}}"
+  }
 }
 resource "newrelic_synthetics_monitor" "ping_monitor" {
   status           = "ENABLED"
