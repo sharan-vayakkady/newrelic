@@ -63,21 +63,36 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
 output "monitor_name" {
   value = newrelic_synthetics_monitor.ping_monitor.name
 }
+
 resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
-  policy_id = newrelic_alert_policy.domain_alerts.id
+  account_id                     = 3954397
+  policy_id                      = newrelic_alert_policy.domain_alerts.id
+  type                           = "static"
+  name                           = "my_condition"
+  description                    = "alert if the domain failed morethan 2"
+  runbook_url                    = "https://www.example.com"
+  enabled                        = true
+  violation_time_limit_seconds   = 3600
+  fill_option                    = "static"
+  fill_value                     = 1.0
+  aggregation_window             = 60
+  aggregation_method             = "event_flow"
+  aggregation_delay              = 120
+  expiration_duration            = 120
+  open_violation_on_expiration   = true
+  close_violations_on_expiration = true
+  slide_by                       = 30
 
   nrql {
-    query      = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AP_SOUTH_1' AND result = 'FAILED' TIMESERIES 1 minute SINCE 10 minutes ago"
-    threshold  = "3"
-    value_function = "SINGLE_VALUE"
+    query = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AP_SOUTH_1' AND result = 'FAILED' TIMESERIES 1 minute SINCE 10 minutes ago"
   }
 
-  type            = "static"
-  name            = "Ping Monitor Alert Condition"
-  enabled         = true
-  runbook_url     = "https://example.com/runbook"
-  expiration      = "6 hours"
-  violation_time_limit_seconds = 600
+  critical {
+    operator              = "above"
+    threshold             = 2
+    threshold_duration    = 600
+    threshold_occurrences = "ALL"
+  }
 }
 
 resource "newrelic_workflow" "my_workflow" {
