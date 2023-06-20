@@ -63,23 +63,22 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
 output "monitor_name" {
   value = newrelic_synthetics_monitor.ping_monitor.name
 }
-
 resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
-  policy_id          = newrelic_alert_policy.domain_alerts.id
-  name               = "my_condition"
-  nrql               = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AP_SOUTH_1' AND result = 'FAILED' TIMESERIES 1 minute"
-  evaluation_offset  = "10 minutes"
-  violation_time_limit_seconds = 600
-  enabled            = true
+  policy_id = newrelic_alert_policy.ping_monitor_policy.id
 
-  critical_threshold {
-    operator  = "above"
-    threshold = 3
+  nrql {
+    query      = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AP_SOUTH_1' AND result = 'FAILED' TIMESERIES 1 minute SINCE 10 minutes ago"
+    threshold  = "3"
+    value_function = "SINGLE_VALUE"
   }
 
-  runbook_url        = "https://www.example.com"
+  type            = "static"
+  name            = "Ping Monitor Alert Condition"
+  enabled         = true
+  runbook_url     = "https://example.com/runbook"
+  expiration      = "6 hours"
+  violation_time_limit_seconds = 600
 }
-
 
 resource "newrelic_workflow" "my_workflow" {
   name = "my_workflows_email"
