@@ -64,7 +64,7 @@ output "monitor_name" {
   value = newrelic_synthetics_monitor.ping_monitor.name
 }
 resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
-  policy_id = newrelic_alert_policy.ping_monitor_policy.id
+  policy_id = newrelic_alert_policy.ping_monitor.id
 
   nrql {
     query      = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AP_SOUTH_1' AND result = 'FAILED' TIMESERIES 1 minute SINCE 10 minutes ago"
