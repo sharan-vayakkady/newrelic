@@ -84,7 +84,7 @@ resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
   slide_by                       = 30
 
   nrql {
-    query = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AWS_AP_SOUTH_1' AND result = 'FAILED'  SINCE 5 minutes ago"
+    query = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = '${newrelic_synthetics_monitor.ping_monitor.name}' AND location = 'AWS_AP_SOUTH_1' AND result = 'FAILED'"
   }
 
   critical {
