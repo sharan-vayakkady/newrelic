@@ -67,7 +67,7 @@ resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
   runbook_url  = "https://www.example.com"
 }
 resource "newrelic_workflow" "my_workflow" {
-  name = "my_workflows"
+  name = "my_workflows_email"
   muting_rules_handling = "NOTIFY_ALL_ISSUES"
   issues_filter {
     name = "my_filter"
