@@ -60,12 +60,24 @@ resource "newrelic_synthetics_monitor" "ping_monitor" {
   verify_ssl                = true
 }
 
-resource "newrelic_synthetics_alert_condition" "ping_monitor_condition" {
-  policy_id    = newrelic_alert_policy.domain_alerts.id
-  name         = "my_condition"
-  monitor_id   = newrelic_synthetics_monitor.ping_monitor.id
-  runbook_url  = "https://www.example.com"
+resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
+  policy_id          = newrelic_alert_policy.domain_alerts.id
+  name               = "my_condition"
+  nrql               = "SELECT count(*) FROM SyntheticCheck WHERE monitorName = 'newrelic_synthetics_monitor.ping_monitor.name' AND location = 'AP_SOUTH_1' AND result = 'FAILED' TIMESERIES 1 minute"
+  evaluation_offset  = "10 minutes"
+  violation_time_limit_seconds = 600
+  signal_lost_label  = "Domain Failure"
+  enabled            = true
+
+  critical_threshold {
+    operator  = "above"
+    threshold = 3
+  }
+
+  runbook_url        = "https://www.example.com"
 }
+
+
 resource "newrelic_workflow" "my_workflow" {
   name = "my_workflows_email"
   muting_rules_handling = "NOTIFY_ALL_ISSUES"
