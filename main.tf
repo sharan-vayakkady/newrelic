@@ -75,7 +75,7 @@ resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
   violation_time_limit_seconds   = 3600
   fill_option                    = "static"
   fill_value                     = 1.0
-  aggregation_window             = 60
+  aggregation_window             = 3600
   aggregation_method             = "event_flow"
   aggregation_delay              = 120
   expiration_duration            = 120
