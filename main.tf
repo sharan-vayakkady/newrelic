@@ -78,7 +78,7 @@ resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
   aggregation_window             = 3600
   aggregation_method             = "event_flow"
   aggregation_delay              = 120
-  expiration_duration            = 10800
+  expiration_duration            = 18000
   open_violation_on_expiration   = true
   close_violations_on_expiration = true
   slide_by                       = 30
