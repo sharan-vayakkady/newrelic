@@ -91,7 +91,7 @@ resource "newrelic_nrql_alert_condition" "ping_monitor_condition" {
     operator              = "above"
     threshold             = 2
     threshold_duration    = 300
-    threshold_occurrences = "ALL"
+    threshold_occurrences = "atleast_once"
   }
 }
 
