@@ -1,0 +1,51 @@
+name: Enable/Disable New Relic Synthetic Monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (enable or disable)'
+        required: true
+        default: 'enable'
+        options:
+          - 'enable'
+          - 'disable'
+
+jobs:
+  enable-disable-monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::476057914212:role/github-action-role
+          role-session-name: MySessionName
+          
+      - name: Get New Relic API key from AWS SSM Parameter Store
+        id: ssm
+        run: |
+          echo "::set-output name=api_key::$(aws ssm get-parameter --name '/github-actions/newrelic-api-key' --with-decryption --query 'Parameter.Value' --output text)"
+
+      - name: Enable or Disable Synthetic Monitor
+        env:
+          NEWRELIC_API_KEY: ${{ steps.ssm.outputs.api_key }}
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "enable" ]; then
+            curl -X POST "https://api.newrelic.com/v2/monitors/synthetic/fa6e372e-63a6-4ad3-a10f-0395de6e275d/enable" \
+              -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+              -H "Content-Type: application/json"
+            echo "Synthetic monitor enabled."
+          elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
+            curl -X POST "https://api.newrelic.com/v2/monitors/synthetic/fa6e372e-63a6-4ad3-a10f-0395de6e275d/disable" \
+              -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+              -H "Content-Type: application/json"
+            echo "Synthetic monitor disabled."
+          else
+            echo "Invalid action. Please choose 'enable' or 'disable'."
+            exit 1
+          fi
