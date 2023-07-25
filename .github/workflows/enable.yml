@@ -38,14 +38,14 @@ jobs:
           NEWRELIC_API_KEY: ${{ steps.ssm.outputs.api_key }}
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
-            curl -X POST "https://api.newrelic.com/v2/monitors/synthetic/fa6e372e-63a6-4ad3-a10f-0395de6e275d/enable" \
-              -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
-              -H "Content-Type: application/json"
+            curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+     -H 'Content-Type: application/json' "https://synthetics.newrelic.com/synthetics/api/v3/monitors/fa6e372e-63a6-4ad3-a10f-0395de6e275d" \
+     -d '{ "status" : "enabled" }'
             echo "Synthetic monitor enabled."
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
-            curl -X POST "https://api.newrelic.com/v2/monitors/synthetic/fa6e372e-63a6-4ad3-a10f-0395de6e275d/disable" \
-              -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
-              -H "Content-Type: application/json"
+            curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+     -H 'Content-Type: application/json' "https://synthetics.newrelic.com/synthetics/api/v3/monitors/fa6e372e-63a6-4ad3-a10f-0395de6e275d" \
+     -d '{ "status" : "disabled" }'
             echo "Synthetic monitor disabled."
           else
             echo "Invalid action. Please choose 'enable' or 'disable'."
