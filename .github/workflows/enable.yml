@@ -15,8 +15,8 @@ jobs:
   enable-disable-monitor:
     runs-on: ubuntu-latest
     permissions:
-     id-token: write
-     contents: read
+      id-token: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
 
       - name: Enable or Disable Synthetic Monitor
         env:
-          NEWRELIC_API_KEY: ${{ steps.ssm.outputs.api_key }}
+          NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
             curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
