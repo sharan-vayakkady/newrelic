@@ -47,8 +47,9 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.action }}" = "enable" ]; then
             monitors="${{ steps.list-monitors.outputs.monitors }}"
+            echo $monitors
             monitors_to_enable=$(echo "$monitors" | grep -o '"id":"[^"]*","status":"disabled"' | sed -E 's/"id":"([^"]*)","status":"disabled"/\1/g')
-
+            echo $monitors_to_enable
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
                 curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
