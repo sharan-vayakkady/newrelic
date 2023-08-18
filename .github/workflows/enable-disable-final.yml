@@ -37,7 +37,8 @@ jobs:
         id: list-monitors
         run: |
           monitors=$(curl -s -X GET -H "Api-Key:${{ steps.ssm.outputs.api_key }}" \
-            "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq -r '[.monitors[] | select(.name | startswith("QA"))]')
+            "https://synthetics.newrelic.com/synthetics/api/v3/monitors")
+          monitors=$(echo "$monitors" | grep -E '"name":.*"QA"' | tr -d '\n' | sed -E 's/.*(\[.*\]).*/\1/')
           echo "::set-output name=monitors::$monitors"
 
       - name: Enable or Disable Synthetic Monitors
@@ -46,7 +47,7 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.action }}" = "enable" ]; then
             monitors="${{ steps.list-monitors.outputs.monitors }}"
-            monitors_to_enable=$(echo "$monitors" | jq -r '.[] | select(.status == "disabled") | .id')
+            monitors_to_enable=$(echo "$monitors" | grep -o '"id":"[^"]*","status":"disabled"' | sed -E 's/"id":"([^"]*)","status":"disabled"/\1/g')
 
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
@@ -67,8 +68,8 @@ jobs:
             current_run_monitors="${{ steps.list-monitors.outputs.monitors }}"
             for last_monitor_id in $last_run_monitors; do
               for current_monitor in $current_run_monitors; do
-                current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
-                current_status=$(echo "$current_monitor" | jq -r '.status')
+                current_monitor_id=$(echo "$current_monitor" | grep -o '"id":"[^"]*"' | sed -E 's/"id":"([^"]*)"/\1/g')
+                current_status=$(echo "$current_monitor" | grep -o '"status":"[^"]*"' | sed -E 's/"status":"([^"]*)"/\1/g')
                 if [ "$last_monitor_id" = "$current_monitor_id" ] && [ "$current_status" = "enabled" ]; then
                   curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                     -H 'Content-Type: application/json' \
