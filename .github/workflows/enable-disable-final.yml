@@ -20,6 +20,8 @@ jobs:
     env:
       AWS_DEFAULT_REGION: us-east-1
       AWS_REGION: us-east-1
+      S3_BUCKET_NAME: ssv-github
+      S3_OBJECT_KEY: last_run_monitors.txt
 
     steps:
       - name: Install jq
@@ -55,7 +57,7 @@ jobs:
           NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
-            monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .id')
+            monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "disabled") | .id')
   
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
@@ -66,25 +68,31 @@ jobs:
                 echo "Synthetic monitor ($monitor_id) enabled."
               done
   
-              echo "$monitors_to_enable" > "$GITHUB_WORKSPACE/last_run_monitors.txt"
+              # Upload to S3
+              echo "$monitors_to_enable" > last_run_monitors.txt
+              aws s3 cp last_run_monitors.txt s3://$S3_BUCKET_NAME/$S3_OBJECT_KEY
             else
               echo "No disabled monitors to enable."
             fi
-  
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
-            last_run_monitors=$(cat "$GITHUB_WORKSPACE/last_run_monitors.txt")
-            for last_monitor_id in $last_run_monitors; do
-              last_monitor_id=$(echo "$last_monitor_id")
-              for current_monitor in $(cat monitors.json); do
-                current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
-                current_status=$(echo "$current_monitor" | jq -r '.status')
-                if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "enabled" ]; then
-                  curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
-                    -H 'Content-Type: application/json' \
-                    "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$current_monitor_id" \
-                    -d '{ "status" : "disabled" }'
-                  echo "Synthetic monitor ($current_monitor_id) disabled."
-                fi
+            aws s3 cp s3://$S3_BUCKET_NAME/$S3_OBJECT_KEY last_run_monitors.txt || true  # Download from S3 (ignore error if not found)
+            if [ -f "last_run_monitors.txt" ]; then
+              last_run_monitors=$(cat "last_run_monitors.txt")
+              for last_monitor_id in $last_run_monitors; do
+                last_monitor_id=$(echo "$last_monitor_id")
+                for current_monitor in $(cat monitors.json); do
+                  current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
+                  current_status=$(echo "$current_monitor" | jq -r '.status')
+                  if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "enabled" ]; then
+                    curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+                      -H 'Content-Type: application/json' \
+                      "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$current_monitor_id" \
+                      -d '{ "status" : "disabled" }'
+                    echo "Synthetic monitor ($current_monitor_id) disabled."
+                  fi
+                done
               done
-            done
+            else
+              echo "No previous monitors found. Skipping disable action."
+            fi
           fi
