@@ -85,8 +85,6 @@ jobs:
                       "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$last_monitor_id" \
                       -d '{ "status" : "disabled" }'
                     echo "Synthetic monitor ($last_monitor_id) disabled."
-                  fi
-                done
               done
             else
               echo "No previous monitors found. Skipping disable action."
