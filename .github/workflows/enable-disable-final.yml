@@ -55,7 +55,7 @@ jobs:
           NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
-            monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "disabled") | .id')
+            monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .id')
   
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
