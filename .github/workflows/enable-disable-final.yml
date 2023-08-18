@@ -48,14 +48,14 @@ jobs:
           monitors=$(curl -s -X GET -H "Api-Key:${{ steps.ssm.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
-          echo "export MONITORS='$monitors'" >> $GITHUB_ENV
+          echo "$monitors" > monitors.json
 
       - name: Enable or Disable Synthetic Monitors
         env:
           NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
-            monitors_to_enable=$(echo "$MONITORS" | jq -r '.[] | select(.status == "disabled") | .id')
+            monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "disabled") | .id')
   
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
@@ -75,7 +75,7 @@ jobs:
             last_run_monitors=$(cat "$GITHUB_WORKSPACE/last_run_monitors.txt")
             for last_monitor_id in $last_run_monitors; do
               last_monitor_id=$(echo "$last_monitor_id")
-              for current_monitor in $MONITORS; do
+              for current_monitor in $(cat monitors.json); do
                 current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
                 current_status=$(echo "$current_monitor" | jq -r '.status')
                 if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "enabled" ]; then
