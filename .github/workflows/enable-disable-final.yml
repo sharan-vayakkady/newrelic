@@ -53,7 +53,7 @@ jobs:
               for monitor_id in $monitors_to_enable; do
                 curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                   -H 'Content-Type: application/json' \
-                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
+                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors/fa6e372e-63a6-4ad3-a10f-0395de6e275d" \
                   -d '{"status": "enabled"}'
                 echo "Synthetic monitor ($monitor_id) enabled."
               done
