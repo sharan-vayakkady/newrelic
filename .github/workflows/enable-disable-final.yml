@@ -54,7 +54,7 @@ jobs:
                 curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
-                  -d "{\"status\": \"enabled\"}"
+                  -d '{"status": "enabled"}'
                 echo "Synthetic monitor ($monitor_id) enabled."
               done
 
@@ -75,7 +75,7 @@ jobs:
                   curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                     -H 'Content-Type: application/json' \
                     "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$current_monitor_id" \
-                    -d "{\"status\": \"disabled\"}"
+                    -d '{"status": "disabled"}'
                   echo "Synthetic monitor ($current_monitor_id) disabled."
                 fi
               done
