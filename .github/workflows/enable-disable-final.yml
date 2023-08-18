@@ -48,7 +48,7 @@ jobs:
           monitors=$(curl -s -X GET -H "Api-Key:${{ steps.ssm.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
-          echo "MONITORS=$monitors" >> $GITHUB_ENV
+          echo "export MONITORS='$monitors'" >> $GITHUB_ENV
 
       - name: Enable or Disable Synthetic Monitors
         env:
