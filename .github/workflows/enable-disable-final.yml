@@ -83,7 +83,7 @@ jobs:
                 for current_monitor in $(cat monitors.json); do
                   current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
                   current_status=$(echo "$current_monitor" | jq -r '.status')
-                  if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "enabled" ]; then
+                  if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "ENABLED" ]; then
                     curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                       -H 'Content-Type: application/json' \
                       "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$current_monitor_id" \
