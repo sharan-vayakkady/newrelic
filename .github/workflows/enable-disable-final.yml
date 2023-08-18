@@ -1,0 +1,83 @@
+name: Enable/Disable New Relic Synthetic Monitor final
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (enable or disable)'
+        required: true
+        default: 'enable'
+        options:
+          - 'enable'
+          - 'disable'
+
+jobs:
+  enable-disable-monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::476057914212:role/github-action-role
+          role-session-name: MySessionName
+
+      - name: Get New Relic API key from AWS SSM Parameter Store
+        id: ssm
+        run: |
+          echo "::set-output name=api_key::$(aws ssm get-parameter --name '/github-actions/newrelic-api-key' --with-decryption --query 'Parameter.Value' --output text)"
+
+      - name: List monitors
+        id: list-monitors
+        run: |
+          monitors=$(curl -s -X GET -H "Api-Key:${{ steps.ssm.outputs.api_key }}" \
+            "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
+            | jq '[.monitors[] | select(.name | startswith("QA"))]')
+          echo "::set-output name=monitors::$monitors"
+
+      - name: Enable or Disable Synthetic Monitors
+        env:
+          NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "enable" ]; then
+            monitors="${{ steps.list-monitors.outputs.monitors }}"
+            monitors_to_enable=$(echo "$monitors" | jq -r '.[] | select(.status == "disabled") | .id')
+
+            if [ -n "$monitors_to_enable" ]; then
+              for monitor_id in $monitors_to_enable; do
+                curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+                  -H 'Content-Type: application/json' \
+                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
+                  -d '{ "status" : "enabled" }'
+                echo "Synthetic monitor ($monitor_id) enabled."
+              done
+
+              echo "$monitors_to_enable" > "$GITHUB_WORKSPACE/last_run_monitors.txt"
+            else
+              echo "No disabled monitors to enable."
+            fi
+
+          elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
+            last_run_monitors=$(cat "$GITHUB_WORKSPACE/last_run_monitors.txt")
+            current_run_monitors="${{ steps.list-monitors.outputs.monitors }}"
+            for last_monitor_id in $last_run_monitors; do
+              last_monitor_id=$(echo "$last_monitor_id")
+              for current_monitor in $current_run_monitors; do
+                current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
+                current_status=$(echo "$current_monitor" | jq -r '.status')
+                if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "enabled" ]; then
+                  curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+                    -H 'Content-Type: application/json' \
+                    "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$current_monitor_id" \
+                    -d '{ "status" : "disabled" }'
+                  echo "Synthetic monitor ($current_monitor_id) disabled."
+                fi
+              done
+            done
+          fi
