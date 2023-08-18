@@ -67,7 +67,6 @@ jobs:
             last_run_monitors=$(cat "$GITHUB_WORKSPACE/last_run_monitors.txt")
             current_run_monitors="${{ steps.list-monitors.outputs.monitors }}"
             for last_monitor_id in $last_run_monitors; do
-              last_monitor_id=$(echo "$last_monitor_id")
               for current_monitor in $current_run_monitors; do
                 current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
                 current_status=$(echo "$current_monitor" | jq -r '.status')
