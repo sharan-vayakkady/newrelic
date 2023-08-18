@@ -1,4 +1,4 @@
-name: Enable/Disable New Relic Synthetic Monitor final
+name: Enable/Disable New Relic Synthetic Monitor
 
 on:
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
         env:
           NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
         run: |
-          if [ "${{ github.event.inputs.action }}" == "enable" ]; then
+          if [ "${{ github.event.inputs.action }}" = "enable" ]; then
             monitors="${{ steps.list-monitors.outputs.monitors }}"
             monitors_to_enable=$(echo "$monitors" | jq -r '.[] | select(.status == "disabled") | .id')
 
@@ -63,7 +63,7 @@ jobs:
               echo "No disabled monitors to enable."
             fi
 
-          elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
+          elif [ "${{ github.event.inputs.action }}" = "disable" ]; then
             last_run_monitors=$(cat "$GITHUB_WORKSPACE/last_run_monitors.txt")
             current_run_monitors="${{ steps.list-monitors.outputs.monitors }}"
             for last_monitor_id in $last_run_monitors; do
@@ -71,7 +71,7 @@ jobs:
               for current_monitor in $current_run_monitors; do
                 current_monitor_id=$(echo "$current_monitor" | jq -r '.id')
                 current_status=$(echo "$current_monitor" | jq -r '.status')
-                if [ "$last_monitor_id" == "$current_monitor_id" ] && [ "$current_status" == "enabled" ]; then
+                if [ "$last_monitor_id" = "$current_monitor_id" ] && [ "$current_status" = "enabled" ]; then
                   curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                     -H 'Content-Type: application/json' \
                     "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$current_monitor_id" \
