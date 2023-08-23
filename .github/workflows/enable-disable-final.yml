@@ -112,7 +112,7 @@ jobs:
         if: ${{ github.event.inputs.action == 'enable' }}
         run: |
           already_enabled_monitors=$(cat already_enabled_monitors.txt)
-          new_monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .id')
+          new_monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
           new_monitors_message="Newly enabled monitors:\n$new_monitors_to_enable"
           message1="Enabled monitors:\n$new_monitors_to_enable"
           message2="Already enabled monitors:\n$already_enabled_monitors"
