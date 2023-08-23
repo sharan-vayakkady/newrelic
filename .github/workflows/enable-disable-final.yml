@@ -43,7 +43,6 @@ jobs:
         id: ssm
         run: |
           echo "::set-output name=api_key::$(aws ssm get-parameter --name '/github-actions/newrelic-api-key' --with-decryption --query 'Parameter.Value' --output text)"
-
       - name: List monitors
         id: list-monitors
         run: |
@@ -51,7 +50,6 @@ jobs:
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
           echo "$monitors" > monitors.json
-
       - name: Fetch already enabled monitors
         if: ${{ github.event.inputs.action == 'enable' }}
         run: |
@@ -59,8 +57,6 @@ jobs:
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA")) | select(.status == "ENABLED") | .name]')
           echo "$already_enabled_monitors" > already_enabled_monitors.txt
-          aws s3 cp already_enabled_monitors.txt s3://$S3_BUCKET_NAME/already_enabled_monitors.txt
-
       - name: Enable or Disable Synthetic Monitors
         env:
           NEWRELIC_API_KEY: "${{ steps.ssm.outputs.api_key }}"
@@ -107,15 +103,19 @@ jobs:
           monitors_after_disable=$(curl -s -X GET -H "Api-Key:${{ steps.ssm.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA")) | select(.status == "ENABLED") | .name]')
-          message="Disabled monitors:\n$disabled_monitors\n\nMonitors still enabled after disable action:\n$monitors_after_disable"
+          message="Disabled monitors:\n$disabled_monitors"
+          if [ -n "$monitors_after_disable" ]; then
+            message="$message\n\nMonitors still enabled after disable action:\n$monitors_after_disable"
+          fi
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" $SLACK_WEBHOOK_URL
-
       - name: Notify Slack
         if: ${{ github.event.inputs.action == 'enable' }}
         run: |
           already_enabled_monitors=$(cat already_enabled_monitors.txt)
           new_monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .id')
-          already_enabled_message="Already enabled monitors:\n$already_enabled_monitors"
           new_monitors_message="Newly enabled monitors:\n$new_monitors_to_enable"
-          message="Enabled monitors:\n$new_monitors_message\n\n$already_enabled_monitors"
+          message="Enabled monitors:\n$new_monitors_message"
+          if [ -n "$already_enabled_monitors" ]; then
+            message="$message\n\nAlready enabled monitors:\n$already_enabled_monitors"
+          fi
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" $SLACK_WEBHOOK_URL
