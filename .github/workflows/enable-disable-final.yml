@@ -113,8 +113,5 @@ jobs:
         run: |
           already_enabled_monitors=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
           new_monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
-          new_monitors_message="Newly enabled monitors:\n$new_monitors_to_enable"
-          message1="Enabled monitors:\n$new_monitors_to_enable"
-          message2="Already enabled monitors:\n$already_enabled_monitors"
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message1\"}" $SLACK_WEBHOOK_URL
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message2\"}" $SLACK_WEBHOOK_URL
+          message="Enabled monitors:\n$new_monitors_to_enable\n\nAlready Enabled Monitors:\n$already_enabled_monitors"
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" $SLACK_WEBHOOK_URL
