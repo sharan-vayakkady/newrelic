@@ -59,6 +59,7 @@ jobs:
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA")) | select(.status == "ENABLED") | .name]')
           echo "$already_enabled_monitors" > already_enabled_monitors.txt
+          aws s3 cp already_enabled_monitors.txt s3://$S3_BUCKET_NAME/already_enabled_monitors.txt
 
       - name: Enable or Disable Synthetic Monitors
         env:
