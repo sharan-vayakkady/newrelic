@@ -95,7 +95,8 @@ jobs:
           disabled_monitors=$(cat last_run_monitors.txt)
           monitors_after_disable=$(curl -s -X GET -H "Api-Key:${{ steps.ssm.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
-            | jq '.monitors[] | select(.name | startswith("QA")) | select(.status == "ENABLED") | .name')
+            | jq '[.monitors[] | select(.name | startswith("QA"))]' \
+            | jq -r '.[] | select(.status == "ENABLED") | .name')
           message="Disabled monitors:\n$disabled_monitors\n\nMonitors still enabled after disable action:\n$monitors_after_disable"
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" $SLACK_WEBHOOK_URL
       - name: Notify Slack for enable
