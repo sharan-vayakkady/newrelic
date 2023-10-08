@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key    = "alo-terraform/ecommerce/roles/synthetic-monitor-qa.tfstate"
+    key    = "ssv-github/synthetic/terraform-secret.tfstate"
     region = "us-east-1"
   }
 }
