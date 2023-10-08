@@ -3,6 +3,7 @@ terraform {
     newrelic = {
       source  = "newrelic/newrelic"
       version = "3.24.2"
+
     }
   }
   backend "s3" {
