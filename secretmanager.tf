@@ -1,10 +1,7 @@
 resource "aws_secretsmanager_secret" "slack_webhook" {
   description = "Slack webhook for enabling notification"
   name        = "/ecomm/synthetic-monitor-qa/slack_webhook"
-  tags = {
-    createdby = "terraform"
-    team      = "devops"
-  }
+  tags = module.slack_webhook_url_label.tags
 }
 
 #resource "aws_secretsmanager_secret" "newrelic_api" {
