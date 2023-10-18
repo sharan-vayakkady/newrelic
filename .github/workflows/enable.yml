@@ -50,14 +50,13 @@ jobs:
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
             echo "$monitors" > monitors.json
-            monitors_to_enable_name=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
-            monitors_to_disable_name=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
       - name: Enable or Disable Synthetic Monitors
         env:
           NEWRELIC_API_KEY: "${{ steps.secret-manager.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
             monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .id')
+            monitors_to_enable_name=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
   
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
@@ -74,6 +73,7 @@ jobs:
             fi
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
             monitors_to_disable=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .id')
+            monitors_to_disable_name=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
             if [ -n "$monitors_to_disable" ]; then
               for monitor_id in $monitors_to_disable; do
                 curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
