@@ -67,13 +67,15 @@ jobs:
                   -d '{ "status" : "enabled" }'
                 echo "Synthetic monitor ($monitor_name) enabled."
               done
+              message="Enabled monitors:\n$monitors_to_enable"
             else
               echo "No disabled monitors to enable."
+              message="o disabled monitors to enable."
             fi
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
-            disabled_monitors=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
+            monitors_to_disable=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
             if [ -n "$disabled_monitors" ]; then
-              for monitor_name in $disabled_monitors; do
+              for monitor_name in $monitors_to_disable; do
                 monitor_id=$(cat monitors.json | jq -r --arg name "$monitor_name" '.[] | select(.name == $name) | .id')
                 curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
                   -H 'Content-Type: application/json' \
@@ -81,7 +83,7 @@ jobs:
                   -d '{ "status" : "disabled" }'
                 echo "Synthetic monitor ($monitor_name) disabled."
               done
-              message="Disabled monitors:\n$disabled_monitors"
+              message="Disabled monitors:\n$monitors_to_disable"
             else
               echo "No disabled monitors found. Skipping disable action."
               message="No disabled monitors found. Skipping disable action."
