@@ -24,15 +24,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Get New Relic API key from AWS Secret Manager
-        id: newrelic-secret
-        run: |
-          echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/newrelic-api' --query 'SecretString' --output text)"
-
       - name: List monitors
         id: list-monitors
         run: |
-          monitors=$(curl -s -X GET -H "Api-Key: ${{ steps.newrelic-secret.outputs.api_key }}" \
+          monitors=$(curl -s -X GET -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq -r '.monitors[] | select(.name | startswith("QA")) | .id')
           echo "$monitors" > monitors.txt
@@ -43,7 +38,7 @@ jobs:
             monitors_to_enable=$(cat monitors.txt)
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
-                curl -X PATCH -H "Api-Key: ${{ steps.newrelic-secret.outputs.api_key }}" \
+                curl -X PATCH -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "enabled" }'
@@ -56,7 +51,7 @@ jobs:
             monitors_to_disable=$(cat monitors.txt)
             if [ -n "$monitors_to_disable" ]; then
               for monitor_id in $monitors_to_disable; do
-                curl -X PATCH -H "Api-Key: ${{ steps.newrelic-secret.outputs.api_key }}" \
+                curl -X PATCH -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "disabled" }'
@@ -73,5 +68,5 @@ jobs:
           action="${{ github.event.inputs.action }}"
           monitors_list=$(cat monitors.txt | tr '\n' ', ' | sed 's/,$//')
           message="Synthetic monitors $action action completed. Monitors: $monitors_list"
-          SLACK_WEBHOOK_URL=$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack-webhook' --query 'SecretString' --output text)
+          SLACK_WEBHOOK_URL="https://hooks.slack.com/services/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"
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL"
