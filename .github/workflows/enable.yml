@@ -32,12 +32,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          role-to-assume: arn:aws:iam::476057914212:role/github-action-role
+          role-session-name: MySessionName
 
       - name: Get New Relic API key from AWS Secrets Manager
         id: secrets-manager
@@ -47,7 +46,7 @@ jobs:
       - name: List monitors
         id: list-monitors
         run: |
-          monitors=$(curl -s -X GET -H "Api-Key: ${{ steps.secrets-manager.outputs.api_key }}" \
+          monitors=$(curl -s -X GET -H "Api-Key:${{ steps.secrets-manager.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
           echo "$monitors" > monitors.json
