@@ -14,37 +14,20 @@ on:
 jobs:
   enable-disable-monitor:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_REGION: us-east-1
 
     steps:
       - name: Install jq
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
+
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
-          role-to-assume: arn:aws:iam::476057914212:role/github-action-role
-          role-session-name: MySessionName
 
       - name: Get New Relic API key from AWS Secret Manager
         id: newrelic-secret
         run: |
           echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/newrelic-api' --query 'SecretString' --output text)"
-
-      - name: Get Slack Webhook URL from AWS Secret Manager
-        id: slack-secret
-        run: |
-          echo "::set-output name=slack_webhook::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack_webhook' --query 'SecretString' --output text)"
 
       - name: List monitors
         id: list-monitors
@@ -90,4 +73,5 @@ jobs:
           action="${{ github.event.inputs.action }}"
           monitors_list=$(cat monitors.txt | tr '\n' ', ' | sed 's/,$//')
           message="Synthetic monitors $action action completed. Monitors: $monitors_list"
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" ${{ steps.slack-secret.outputs.slack_webhook }}
+          SLACK_WEBHOOK_URL=$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack_webhook' --query 'SecretString' --output text)
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL"
