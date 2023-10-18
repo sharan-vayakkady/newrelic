@@ -43,7 +43,8 @@ jobs:
         id: secret-manager
         run: |
           secret_value=$(aws secretsmanager get-secret-value --secret-id /ecomm/synthetic-monitor-qa/newrelic-api --query 'SecretString' --output text)
-          echo "::set-output name=api_key::$secret_value"
+          api_key=$(echo $secret_value | jq -r '.api_key')
+          echo "::set-output name=api_key::$api_key"
           
       - name: List monitors
         id: list-monitors
