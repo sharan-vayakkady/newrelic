@@ -55,16 +55,13 @@ jobs:
           echo "$monitors" > monitors.txt
 
       - name: Enable or Disable Synthetic Monitors
-        env:
-          NEWRELIC_API_KEY: "${{ steps.newrelic-secret.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
             monitors_to_enable=$(cat monitors.txt)
 
             if [ -n "$monitors_to_enable" ]; then
-              for monitor in $monitors_to_enable; do
-                monitor_id=$(echo "$monitor" | jq -r '.id')
-                curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+              for monitor_id in $monitors_to_enable; do
+                curl -X PATCH -H "Api-Key:${{ steps.newrelic-secret.outputs.api_key }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "enabled" }'
@@ -77,9 +74,8 @@ jobs:
             monitors_to_disable=$(cat monitors.txt)
 
             if [ -n "$monitors_to_disable" ]; then
-              for monitor in $monitors_to_disable; do
-                monitor_id=$(echo "$monitor" | jq -r '.id')
-                curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+              for monitor_id in $monitors_to_disable; do
+                curl -X PATCH -H "Api-Key:${{ steps.newrelic-secret.outputs.api_key }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "disabled" }'
