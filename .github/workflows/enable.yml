@@ -19,8 +19,9 @@ jobs:
       contents: read
     env:
       AWS_DEFAULT_REGION: us-east-1
-      NEWRELIC_API_SECRET_NAME: /ecomm/synthetic-monitor-qa/newrelic-api
-      SLACK_WEBHOOK_SECRET_NAME: /ecomm/synthetic-monitor-qa/slack_webhook
+      S3_BUCKET_NAME: ssv-github
+      S3_OBJECT_KEY: last_run_monitors.txt
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Store your Slack webhook URL as a secret in your GitHub repository
 
     steps:
       - name: Install jq
@@ -38,51 +39,69 @@ jobs:
           role-session-name: MySessionName
 
       - name: Get New Relic API key from AWS Secrets Manager
-        id: newrelic-secret
+        id: secrets-manager
         run: |
-          NEWRELIC_API_KEY=$(aws secretsmanager get-secret-value --secret-id $NEWRELIC_API_SECRET_NAME --query 'SecretString.api_key' --output text)
-          echo "Retrieved New Relic API Key: $NEWRELIC_API_KEY"
-          echo "::set-output name=NEWRELIC_API_KEY::$NEWRELIC_API_KEY"
-        shell: bash
+          echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/newrelic-api' --query 'SecretString' --output text)"
 
       - name: List monitors
         id: list-monitors
         run: |
-          monitors=$(curl -s -X GET -H "Api-Key:${{ steps.newrelic-secret.outputs.NEWRELIC_API_KEY }}" \
+          monitors=$(curl -s -X GET -H "Api-Key:${{ steps.secrets-manager.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
           echo "$monitors" > monitors.json
 
       - name: Enable or Disable Synthetic Monitors
+        env:
+          NEWRELIC_API_KEY: "${{ steps.secrets-manager.outputs.api_key }}"
         run: |
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
-            # Enable monitors logic here
-            # ...
-            echo "Monitors enabled."
+            monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
+  
+            if [ -n "$monitors_to_enable" ]; then
+              for monitor_name in $monitors_to_enable; do
+                monitor_id=$(cat monitors.json | jq -r --arg name "$monitor_name" '.[] | select(.name == $name) | .id')
+                curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+                  -H 'Content-Type: application/json' \
+                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
+                  -d '{ "status" : "enabled" }'
+                echo "Synthetic monitor ($monitor_name) enabled."
+              done
+  
+              # Upload to S3
+              echo "$monitors_to_enable" > last_run_monitors.txt
+              aws s3 cp last_run_monitors.txt s3://$S3_BUCKET_NAME/$S3_OBJECT_KEY
+            else
+              echo "No disabled monitors to enable."
+            fi
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
-            # Disable monitors logic here
-            # ...
-            echo "Monitors disabled."
+            aws s3 cp s3://$S3_BUCKET_NAME/$S3_OBJECT_KEY last_run_monitors.txt
+            if [ -f "last_run_monitors.txt" ]; then
+              last_run_monitors=$(cat "last_run_monitors.txt")
+              for last_monitor_name in $last_run_monitors; do
+                last_monitor_id=$(cat monitors.json | jq -r --arg name "$last_monitor_name" '.[] | select(.name == $name) | .id')
+                curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
+                  -H 'Content-Type: application/json' \
+                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$last_monitor_id" \
+                  -d '{ "status" : "disabled" }'
+                echo "Synthetic monitor ($last_monitor_name) disabled."
+              done
+            else
+              echo "No previous monitors found. Skipping disable action."
+            fi
           fi
-
-      - name: Get Slack Webhook URL from AWS Secrets Manager
-        id: slack-secret
-        run: |
-          SLACK_WEBHOOK_URL=$(aws secretsmanager get-secret-value --secret-id $SLACK_WEBHOOK_SECRET_NAME --query 'SecretString.slack_webhook' --output text)
-          echo "Retrieved Slack Webhook URL: $SLACK_WEBHOOK_URL"
-          echo "::set-output name=SLACK_WEBHOOK_URL::$SLACK_WEBHOOK_URL"
-        shell: bash
 
       - name: Notify Slack for disable
         if: ${{ github.event.inputs.action == 'disable' }}
         run: |
-          # Slack notification logic for disable action
-          # ...
-          echo "Notifying Slack for disable action."
-        
+          disabled_monitors=$(cat last_run_monitors.txt)
+          monitors_after_disable=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
+          message="Disabled monitors:\n$disabled_monitors\n\nMonitors still enabled after disable action:\n$monitors_after_disable"
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" $SLACK_WEBHOOK_URL
       - name: Notify Slack for enable
         if: ${{ github.event.inputs.action == 'enable' }}
         run: |
-          # Slack notification logic for enable action
-          # ...
-          echo "Notifying Slack for enable action."
+          already_enabled_monitors=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
+          new_monitors_to_enable=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
+          message="Enabled monitors:\n$new_monitors_to_enable\n\nAlready Enabled Monitors:\n$already_enabled_monitors"
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" $SLACK_WEBHOOK_URL
