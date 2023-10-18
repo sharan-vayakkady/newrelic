@@ -74,7 +74,7 @@ jobs:
             fi
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
             monitors_to_disable=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
-            if [ -n "$disabled_monitors" ]; then
+            if [ -n "$monitors_to_disable" ]; then
               for monitor_name in $monitors_to_disable; do
                 monitor_id=$(cat monitors.json | jq -r --arg name "$monitor_name" '.[] | select(.name == $name) | .id')
                 curl -X PATCH -H "Api-Key:${{ env.NEWRELIC_API_KEY }}" \
