@@ -39,12 +39,12 @@ jobs:
       - name: Get New Relic API key from AWS Secret Manager
         id: newrelic-secret
         run: |
-          echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/github-actions/newrelic-api-key' --query 'SecretString' --output text)"
+          echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/newrelic-api' --query 'SecretString' --output text)"
 
       - name: Get Slack Webhook URL from AWS Secret Manager
         id: slack-secret
         run: |
-          echo "::set-output name=slack_webhook::$(aws secretsmanager get-secret-value --secret-id '/github-actions/slack-webhook-url' --query 'SecretString' --output text)"
+          echo "::set-output name=slack_webhook::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack_webhook' --query 'SecretString' --output text)"
 
       - name: List monitors
         id: list-monitors
