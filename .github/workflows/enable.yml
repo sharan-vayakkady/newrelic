@@ -49,10 +49,9 @@ jobs:
           monitors=$(curl -s -X GET -H "Api-Key:${{ steps.secret-manager.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
+            echo "$monitors" > monitors.json
             monitors_to_enable_name=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
             monitors_to_disable_name=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
-            echo "$monitors" > monitors.json
-      
       - name: Enable or Disable Synthetic Monitors
         env:
           NEWRELIC_API_KEY: "${{ steps.secret-manager.outputs.api_key }}"
