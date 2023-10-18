@@ -20,9 +20,7 @@ jobs:
     env:
       AWS_DEFAULT_REGION: us-east-1
       NEWRELIC_API_SECRET_NAME: /ecomm/synthetic-monitor-qa/newrelic-api
-      NEWRELIC_API_SECRET_KEY: api_key
       SLACK_WEBHOOK_SECRET_NAME: /ecomm/synthetic-monitor-qa/slack_webhook
-      SLACK_WEBHOOK_SECRET_KEY: slack_webhook
 
     steps:
       - name: Install jq
@@ -42,7 +40,7 @@ jobs:
       - name: Get New Relic API key from AWS Secrets Manager
         id: newrelic-secret
         run: |
-          echo "::set-output name=NEWRELIC_API_KEY::$(aws secretsmanager get-secret-value --secret-id $NEWRELIC_API_SECRET_NAME --query 'SecretString.$NEWRELIC_API_SECRET_KEY' --output text)"
+          echo "::set-output name=NEWRELIC_API_KEY::$(aws secretsmanager get-secret-value --secret-id $NEWRELIC_API_SECRET_NAME --query 'SecretString.api_key' --output text)"
         shell: bash
 
       - name: List monitors
@@ -89,7 +87,7 @@ jobs:
       - name: Get Slack Webhook URL from AWS Secrets Manager
         id: slack-secret
         run: |
-          echo "::set-output name=SLACK_WEBHOOK_URL::$(aws secretsmanager get-secret-value --secret-id $SLACK_WEBHOOK_SECRET_NAME --query 'SecretString.$SLACK_WEBHOOK_SECRET_KEY' --output text)"
+          echo "::set-output name=SLACK_WEBHOOK_URL::$(aws secretsmanager get-secret-value --secret-id $SLACK_WEBHOOK_SECRET_NAME --query 'SecretString.slack_webhook' --output text)"
         shell: bash
 
       - name: Notify Slack for disable
