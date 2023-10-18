@@ -39,17 +39,17 @@ jobs:
       - name: Get New Relic API key from AWS Secret Manager
         id: newrelic-secret
         run: |
-          echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/newrelic-api' --query 'SecretString' --output text)"
+          echo "::set-output name=api_key::$(aws secretsmanager get-secret-value --secret-id '/github-actions/newrelic-api-key' --query 'SecretString' --output text)"
 
       - name: Get Slack Webhook URL from AWS Secret Manager
         id: slack-secret
         run: |
-          echo "::set-output name=slack_webhook::$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack_webhook' --query 'SecretString' --output text)"
+          echo "::set-output name=slack_webhook::$(aws secretsmanager get-secret-value --secret-id '/github-actions/slack-webhook-url' --query 'SecretString' --output text)"
 
       - name: List monitors
         id: list-monitors
         run: |
-          monitors=$(curl -s -X GET -H "Api-Key:${{ steps.newrelic-secret.outputs.api_key }}" \
+          monitors=$(curl -s -X GET -H "Api-Key: ${{ steps.newrelic-secret.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq -r '.monitors[] | select(.name | startswith("QA"))')
           echo "$monitors" > monitors.txt
@@ -61,7 +61,7 @@ jobs:
 
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
-                curl -X PATCH -H "Api-Key:${{ steps.newrelic-secret.outputs.api_key }}" \
+                curl -X PATCH -H "Api-Key: ${{ steps.newrelic-secret.outputs.api_key }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "enabled" }'
@@ -75,7 +75,7 @@ jobs:
 
             if [ -n "$monitors_to_disable" ]; then
               for monitor_id in $monitors_to_disable; do
-                curl -X PATCH -H "Api-Key:${{ steps.newrelic-secret.outputs.api_key }}" \
+                curl -X PATCH -H "Api-Key: ${{ steps.newrelic-secret.outputs.api_key }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "disabled" }'
