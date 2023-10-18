@@ -46,10 +46,11 @@ jobs:
       - name: List monitors
         id: list-monitors
         run: |
-          monitors=$(curl -s -X GET -H "Api-Key:${{ steps.secrets-manager.outputs.api_key }}" \
-            "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
-            | jq '[.monitors[] | select(.name | startswith("QA"))]')
-          echo "$monitors" > monitors.json
+           monitors=$(curl -s -X GET -H "Api-Key:${{ steps.secrets-manager.outputs.api_key }}" \
+           "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
+           | jq '[.monitors[] | select(.name | startswith("QA"))]')
+           echo "$monitors" > monitors.json
+
 
       - name: Enable or Disable Synthetic Monitors
         env:
