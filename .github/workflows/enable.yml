@@ -73,5 +73,5 @@ jobs:
           action="${{ github.event.inputs.action }}"
           monitors_list=$(cat monitors.txt | tr '\n' ', ' | sed 's/,$//')
           message="Synthetic monitors $action action completed. Monitors: $monitors_list"
-          SLACK_WEBHOOK_URL=$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack_webhook' --query 'SecretString' --output text)
+          SLACK_WEBHOOK_URL=$(aws secretsmanager get-secret-value --secret-id '/ecomm/synthetic-monitor-qa/slack-webhook' --query 'SecretString' --output text)
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL"
