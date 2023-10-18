@@ -49,7 +49,9 @@ jobs:
           monitors=$(curl -s -X GET -H "Api-Key:${{ steps.secret-manager.outputs.api_key }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
-          echo "$monitors" > monitors.json
+            monitors_to_enable_name=$(echo "$monitors" | jq -r '.[] | select(.status == "DISABLED") | .name')
+            monitors_to_disable_name=$(echo "$monitors" | jq -r '.[] | select(.status == "ENABLED") | .name')
+            echo "$monitors" > monitors.json
       
       - name: Enable or Disable Synthetic Monitors
         env:
@@ -66,7 +68,7 @@ jobs:
                   -d '{ "status" : "enabled" }'
                 echo "Synthetic monitor ($monitor_name) enabled."
               done
-              message="Enabled monitors:\n$monitors_to_enable"
+              message="Enabled monitors:\n$monitors_to_enable_name"
             else
               echo "No disabled monitors to enable."
               message="o disabled monitors to enable."
@@ -79,9 +81,9 @@ jobs:
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "disabled" }'
-                echo "Synthetic monitor ($monitor_name) disabled."
+                echo "Synthetic monitor ($monitor_id) disabled."
               done
-              message="Disabled monitors:\n$monitors_to_disable"
+              message="Disabled monitors:\n$monitors_to_disable_name"
             else
               echo "No disabled monitors found. Skipping disable action."
               message="No disabled monitors found. Skipping disable action."
