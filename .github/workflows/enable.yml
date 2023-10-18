@@ -29,7 +29,7 @@ jobs:
         run: |
           monitors=$(curl -s -X GET -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
-            | jq -r '.monitors[] | select(.name | startswith("QA")) | .id')
+            | jq -r '.monitors[] | select(.name | startswith("QA")) | .name')
           echo "$monitors" > monitors.txt
 
       - name: Enable or Disable Synthetic Monitors
@@ -37,12 +37,15 @@ jobs:
           if [ "${{ github.event.inputs.action }}" == "enable" ]; then
             monitors_to_enable=$(cat monitors.txt)
             if [ -n "$monitors_to_enable" ]; then
-              for monitor_id in $monitors_to_enable; do
+              for monitor_name in $monitors_to_enable; do
+                monitor_id=$(curl -s -X GET -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
+                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
+                  | jq -r --arg name "$monitor_name" '.monitors[] | select(.name == $name) | .id')
                 curl -X PATCH -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "enabled" }'
-                echo "Synthetic monitor ($monitor_id) enabled."
+                echo "Synthetic monitor ($monitor_name) enabled."
               done
             else
               echo "No disabled monitors to enable."
@@ -50,12 +53,15 @@ jobs:
           elif [ "${{ github.event.inputs.action }}" == "disable" ]; then
             monitors_to_disable=$(cat monitors.txt)
             if [ -n "$monitors_to_disable" ]; then
-              for monitor_id in $monitors_to_disable; do
+              for monitor_name in $monitors_to_disable; do
+                monitor_id=$(curl -s -X GET -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
+                  "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
+                  | jq -r --arg name "$monitor_name" '.monitors[] | select(.name == $name) | .id')
                 curl -X PATCH -H "Api-Key: NRAK-P5ZRWJG8TH6LV2D9YQQT8AJ72PL" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "disabled" }'
-                echo "Synthetic monitor ($monitor_id) disabled."
+                echo "Synthetic monitor ($monitor_name) disabled."
               done
             else
               echo "No enabled monitors to disable."
