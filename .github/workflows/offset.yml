@@ -30,7 +30,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          aws-region: us-east-1
           role-to-assume: arn:aws:iam::476057914212:role/github-action-role
           role-session-name: MySessionName
       
@@ -45,17 +45,17 @@ jobs:
         id: list-monitors
         run: |
           monitors=()
-	        offset=0
+          offset=0
           while true; do
-          total=$(curl -s -X GET -H "Api-Key: NRAK-DFG1PAH43C10XSC45UWCWYP6BHZ" -G -d "offset=$offset&limit=100" \
-          "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[]]')
-          response=$(curl -s -X GET -H "Api-Key: NRAK-DFG1PAH43C10XSC45UWCWYP6BHZ" -G -d "offset=$offset&limit=100" \
-          "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[] | select(.name | startswith("QA"))]')
-          monitors+=($(echo "$response" | jq -r '.[]'))
-          if [[ $(echo "$total" | jq -r 'length') -lt 100 ]]; then
-          break
-          fi
-          offset=$((offset + 100))
+            total=$(curl -s -X GET -H "Api-Key:${{ secrets.API_KEY }}" -G -d "offset=$offset&limit=100" \
+              "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[]]')
+            response=$(curl -s -X GET -H "Api-Key:${{ secrets.API_KEY }}" -G -d "offset=$offset&limit=100" \
+              "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[] | select(.name | startswith("QA"))]')
+            monitors+=($(echo "$response" | jq -r '.[]'))
+            if [[ $(echo "$total" | jq -r 'length') -lt 100 ]]; then
+              break
+            fi
+            offset=$((offset + 100))
           done
           echo "${monitors[@]}" > monitors.json
 
