@@ -58,13 +58,12 @@ jobs:
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[]]')
             response=$(curl -s -X GET -H "Api-Key:${{ env.API_KEY }}" -G -d "offset=$offset&limit=100" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[] | select(.name | startswith("QA"))]')
-            monitors+=($(echo "$response" | jq -r '.[]'))
+            echo "$response" >> monitors.json
             if [[ $(echo "$total" | jq -r 'length') -lt 100 ]]; then
               break
             fi
             offset=$((offset + 100))
           done
-          echo "${monitors[@]}" > monitors.json
 
       - name: Enable or Disable Synthetic Monitors
         run: |
