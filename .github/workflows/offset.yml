@@ -1,4 +1,4 @@
-name: offset
+name: newrelic_qa_final_2023-10-19_1
 
 on:
   workflow_dispatch:
@@ -17,6 +17,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    env:
+      AWS_DEFAULT_REGION: us-east-1
 
     steps:
       - name: Install jq
@@ -30,15 +32,20 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
           role-to-assume: arn:aws:iam::476057914212:role/github-action-role
           role-session-name: MySessionName
       
-      - name: Get secrets from Secret Manager
+      - name: Get newrelic secret from Secret Manager
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids:
             API_KEY,/ecomm/synthetic-monitor-qa/newrelic-api
+
+      - name: Get slack webhook from Secret Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids:
             SLACK_WEBHOOK,/ecomm/synthetic-monitor-qa/slack_webhook
 
       - name: List monitors
@@ -47,10 +54,10 @@ jobs:
           monitors=()
           offset=0
           while true; do
-            total=$(curl -s -X GET -H "Api-Key:${{ secrets.API_KEY }}" -G -d "offset=$offset&limit=100" \
-              "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[]]')
-            response=$(curl -s -X GET -H "Api-Key:${{ secrets.API_KEY }}" -G -d "offset=$offset&limit=100" \
-              "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[] | select(.name | startswith("QA"))]')
+            total=$(curl -s -X GET -H "Api-Key:${{ env.API_KEY }}" -G -d "offset=$offset&limit=100" \
+            "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[]]')
+            response=$(curl -s -X GET -H "Api-Key:${{ env.API_KEY }}" -G -d "offset=$offset&limit=100" \
+            "https://synthetics.newrelic.com/synthetics/api/v3/monitors" | jq '[.monitors[] | select(.name | startswith("QA"))]')
             monitors+=($(echo "$response" | jq -r '.[]'))
             if [[ $(echo "$total" | jq -r 'length') -lt 100 ]]; then
               break
