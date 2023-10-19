@@ -40,18 +40,18 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids:
-            api_key,/ecomm/synthetic-monitor-qa/newrelic-api
+            API_KEY,/ecomm/synthetic-monitor-qa/newrelic-api
 
       - name: Get slack webhook from Secret Manager
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids:
-            slack_webhook,/ecomm/synthetic-monitor-qa/slack_webhook
+            SLACK_WEBHOOK,/ecomm/synthetic-monitor-qa/slack_webhook
 
       - name: List monitors
         id: list-monitors
         run: |
-          monitors=$(curl -s -X GET -H "Api-Key:${{ env.api_key }}" \
+          monitors=$(curl -s -X GET -H "Api-Key:${{ env.API_KEY }}" \
             "https://synthetics.newrelic.com/synthetics/api/v3/monitors" \
             | jq '[.monitors[] | select(.name | startswith("QA"))]')
           echo "$monitors" > monitors.json
@@ -63,7 +63,7 @@ jobs:
             monitors_to_enable_name=$(cat monitors.json | jq -r '.[] | select(.status == "DISABLED") | .name')
             if [ -n "$monitors_to_enable" ]; then
               for monitor_id in $monitors_to_enable; do
-                curl -X PATCH -H "Api-Key:${{ env.api_key }}" \
+                curl -X PATCH -H "Api-Key:${{ env.API_KEY }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "enabled" }'
@@ -79,7 +79,7 @@ jobs:
             monitors_to_disable_name=$(cat monitors.json | jq -r '.[] | select(.status == "ENABLED") | .name')
             if [ -n "$monitors_to_disable" ]; then
               for monitor_id in $monitors_to_disable; do
-                curl -X PATCH -H "Api-Key:${{ env.api_key }}" \
+                curl -X PATCH -H "Api-Key:${{ env.API_KEY }}" \
                   -H 'Content-Type: application/json' \
                   "https://synthetics.newrelic.com/synthetics/api/v3/monitors/$monitor_id" \
                   -d '{ "status" : "disabled" }'
@@ -96,4 +96,4 @@ jobs:
       - name: Notify Slack
         run: |
           monitors_status=$(cat monitors_status.txt)
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$monitors_status\"}" $slack_webhook
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$monitors_status\"}" $SLACK_WEBHOOK
